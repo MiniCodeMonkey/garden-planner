@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use DOMDocument;
 use Illuminate\Database\Seeder;
 use App\Models\Seed;
 use App\Models\SeedInventory;
@@ -22,11 +23,14 @@ class SeedSeeder extends Seeder
 
         $rows->map(fn($row) => array_combine($headers, $row))
             ->each(function ($row) {
+                echo $row['Name'] . PHP_EOL;
+
                 $seed = new Seed();
                 $seed->name = $row['Name'];
                 $seed->variety = $row['Variety'] === '?' ? null : $row['Variety'];
                 $seed->category = $row['Category'];
                 $seed->link = $row['Link'];
+                $seed->image_filename = $this->downloadImage($row['Link']);
                 $seed->green_house = $row['Green house?'] === 'Yes';
 
                 [$sproutingTimeDaysMin, $sproutingTimeDaysMax] = explode('-', $row['Sprouting time (days)'] . '-');
@@ -58,5 +62,40 @@ class SeedSeeder extends Seeder
 
                 $seed->inventory()->save($inventory);
             });
+    }
+
+    private function downloadImage(string $url)
+    {
+        $options = [
+            'http' => [
+                'user_agent' => 'Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36'
+            ]
+        ];
+        $context = stream_context_create($options);
+
+        $url = filter_var($url, FILTER_VALIDATE_URL);
+        if (!$url) {
+            return null;
+        }
+
+        $contents = file_get_contents($url, false, $context);
+
+        libxml_use_internal_errors(true);
+        $dom = new DOMDocument();
+        $dom->loadHTML($contents);
+
+        foreach ($dom->getElementsByTagName('meta') as $meta) {
+            if ($meta->getAttribute('property') === 'og:image') {
+                $imageUrl = $meta->getAttribute('content');
+                $ext = strtolower(pathinfo($imageUrl, PATHINFO_EXTENSION));
+                $ext = explode('?', $ext)[0];
+
+                $filename = 'app/public/' . md5($url) . '.' . $ext;
+                file_put_contents(storage_path($filename), file_get_contents($imageUrl, false, $context));
+                return $filename;
+            }
+        }
+
+        return null;
     }
 }

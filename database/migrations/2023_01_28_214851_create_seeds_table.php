@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
 
             $table->string('name');
+            $table->string('image_filename')->nullable();
             $table->string('variety')->nullable();
             $table->string('category');
             $table->string('link')->nullable();
