@@ -21,3 +21,5 @@ Route::get('seeds', function () {
     $seeds = \App\Models\Seed::all();
     return view('seeds', ['seeds' => $seeds]);
 });
+
+Route::get('calendar', \App\Http\Controllers\CalendarController::class);

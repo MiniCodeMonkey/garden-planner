@@ -104,11 +104,11 @@ const user = {
     'https://www.gravatar.com/avatar/045dfdf10ef09f0eeaf9c4f0a27f5c6e?s=256',
 }
 const navigation = [
-  { name: 'Dashboard', href: '/', current: true },
-  { name: 'Seeds', href: '/seeds', current: false },
-  { name: 'Garden', href: '/garden', current: false },
-  { name: 'Calendar', href: '/calendar', current: false },
-  { name: 'Reports', href: '/reports', current: false },
+  { name: 'Dashboard', href: '/', current: window.location.pathname === '/' },
+  { name: 'Seeds', href: '/seeds', current: window.location.pathname.indexOf('/seeds') === 0 },
+  { name: 'Garden', href: '/garden', current: window.location.pathname.indexOf('/garden') === 0 },
+  { name: 'Calendar', href: '/calendar', current: window.location.pathname.indexOf('/calendar') === 0 },
+  { name: 'Reports', href: '/reports', current: window.location.pathname.indexOf('/reports') === 0 },
 ]
 const userNavigation = [
   { name: 'Your Profile', href: '#' },
