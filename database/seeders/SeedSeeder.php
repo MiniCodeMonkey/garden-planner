@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use Carbon\Carbon;
 use DOMDocument;
 use Illuminate\Database\Seeder;
 use App\Models\Seed;
@@ -10,6 +11,8 @@ use Illuminate\Support\Facades\Storage;
 
 class SeedSeeder extends Seeder
 {
+    const IMPORT_DATE_FORMAT = 'd/m/Y';
+
     /**
      * Run the database seeds.
      *
@@ -47,13 +50,13 @@ class SeedSeeder extends Seeder
 
                 $seed->seed_depth = floatval($row['Seed depth']);
 
-                $seed->seeding_start = $row['Start seeding'] === '-' ? null : $row['Start seeding'];
-                $seed->seeding_end = $row['End seeding'] === '-' ? null : $row['End seeding'];
-                $seed->planting_start = $row['Start planting'] === '-' ? null : $row['Start planting'];
-                $seed->planting_end = $row['End planting'] === '-' ? null : $row['End planting'];
-                $seed->harvest_start = $row['Start harvest'] === '-' ? null : $row['Start harvest'];
-                $seed->harvest_end = $row['End Harvest'] === '-' ? null : $row['End Harvest'];
-                $seed->inventory_last_checked = $row['Inventory last updated'] === '-' ? null : $row['Inventory last updated'];
+                $seed->seeding_start = str_contains($row['Start seeding'], '/') ? Carbon::createFromFormat(self::IMPORT_DATE_FORMAT, $row['Start seeding']) : null;
+                $seed->seeding_end = str_contains($row['End seeding'], '/') ? Carbon::createFromFormat(self::IMPORT_DATE_FORMAT, $row['End seeding']) : null;
+                $seed->planting_start = str_contains($row['Start planting'], '/') ? Carbon::createFromFormat(self::IMPORT_DATE_FORMAT, $row['Start planting']) : null;
+                $seed->planting_end = str_contains($row['End planting'], '/') ? Carbon::createFromFormat(self::IMPORT_DATE_FORMAT, $row['End planting']) : null;
+                $seed->harvest_start = str_contains($row['Start harvest'], '/') ? Carbon::createFromFormat(self::IMPORT_DATE_FORMAT, $row['Start harvest']) : null;
+                $seed->harvest_end = str_contains($row['End Harvest'], '/') ? Carbon::createFromFormat(self::IMPORT_DATE_FORMAT, $row['End Harvest']) : null;
+                $seed->inventory_last_checked = str_contains($row['Inventory last updated'], '/') ? Carbon::createFromFormat(self::IMPORT_DATE_FORMAT, $row['Inventory last updated']) : null;
                 $seed->notes = $row['Notes'] ?? null;
 
                 $seed->save();
