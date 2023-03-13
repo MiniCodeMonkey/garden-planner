@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Seed extends Model
 {
@@ -26,8 +27,8 @@ class Seed extends Model
     public function publicImageUrl(): Attribute {
         return Attribute::make(
             get: fn() => $this->image_filename
-                ? asset('storage/' . basename($this->image_filename))
-                : 'plant.png'
+                ? Storage::url($this->image_filename)
+                : asset('plant.png')
         );
     }
 }

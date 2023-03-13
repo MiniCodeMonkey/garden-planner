@@ -6,6 +6,7 @@ use DOMDocument;
 use Illuminate\Database\Seeder;
 use App\Models\Seed;
 use App\Models\SeedInventory;
+use Illuminate\Support\Facades\Storage;
 
 class SeedSeeder extends Seeder
 {
@@ -66,6 +67,8 @@ class SeedSeeder extends Seeder
 
     private function downloadImage(string $url)
     {
+        $disk = Storage::disk();
+
         $options = [
             'http' => [
                 'user_agent' => 'Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36'
@@ -90,8 +93,12 @@ class SeedSeeder extends Seeder
                 $ext = strtolower(pathinfo($imageUrl, PATHINFO_EXTENSION));
                 $ext = explode('?', $ext)[0];
 
-                $filename = 'app/public/' . md5($url) . '.' . $ext;
-                file_put_contents(storage_path($filename), file_get_contents($imageUrl, false, $context));
+                $filename = 'seeds/' . md5($url) . '.' . $ext;
+
+                if (!$disk->exists($filename)) {
+                    $disk->put($filename, file_get_contents($imageUrl, false, $context), 'public');
+                }
+
                 return $filename;
             }
         }
