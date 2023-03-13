@@ -38,7 +38,7 @@ class SeedSeeder extends Seeder
                 $seed->green_house = $row['Green house?'] === 'Yes';
 
                 [$sproutingTimeDaysMin, $sproutingTimeDaysMax] = explode('-', $row['Sprouting time (days)'] . '-');
-                $seed->sprouting_time_days_min = $sproutingTimeDaysMin;
+                $seed->sprouting_time_days_min = $sproutingTimeDaysMin === '?' ? null : $sproutingTimeDaysMin;
                 $seed->sprouting_time_days_max = $sproutingTimeDaysMax;
                 $seed->sun = $row['Sun'];
                 $seed->height = intval($row['Height']);
