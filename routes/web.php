@@ -1,9 +1,9 @@
 <?php
 
 use App\Http\Controllers\CalendarController;
+use App\Http\Controllers\GardensController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SeedsController;
-use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -40,6 +40,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/seeds', [SeedsController::class, 'index'])->name('seeds.index');
     Route::get('/seeds/{seed}', [SeedsController::class, 'show'])->name('seeds.show');
     Route::get('/calendar', [CalendarController::class, 'index'])->name('calendar.index');
+    Route::get('/garden', [GardensController::class, 'index'])->name('gardens.index');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

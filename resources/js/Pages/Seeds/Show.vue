@@ -140,8 +140,8 @@ const currentTab = ref('Details')
             </div>
 
             <div class="mx-auto mt-6 max-w-5xl px-4 sm:px-6 lg:px-8" v-if="currentTab === 'Calendar'">
-                <dl class="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">
-                    <div class="sm:col-span-2" v-if="seed.seeding_start.length > 0">
+                <dl class="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-3">
+                    <div v-if="seed.seeding_start">
                         <dt class="text-sm font-medium text-gray-500">Seed</dt>
                         <dd class="mt-1 max-w-prose space-y-5 text-sm text-gray-900">
                             {{ dayjs(seed.seeding_start).format('D/M') }}
@@ -150,7 +150,7 @@ const currentTab = ref('Details')
                         </dd>
                     </div>
 
-                    <div class="sm:col-span-2" v-if="seed.planting_start.length > 0">
+                    <div v-if="seed.planting_start">
                         <dt class="text-sm font-medium text-gray-500">Plant</dt>
                         <dd class="mt-1 max-w-prose space-y-5 text-sm text-gray-900">
                             {{ dayjs(seed.planting_start).format('D/M') }}
@@ -159,7 +159,7 @@ const currentTab = ref('Details')
                         </dd>
                     </div>
 
-                    <div class="sm:col-span-2" v-if="seed.harvest_start.length > 0">
+                    <div v-if="seed.harvest_start">
                         <dt class="text-sm font-medium text-gray-500">Harvest</dt>
                         <dd class="mt-1 max-w-prose space-y-5 text-sm text-gray-900">
                             {{ dayjs(seed.harvest_start).format('D/M') }}
