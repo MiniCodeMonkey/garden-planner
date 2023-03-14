@@ -20,6 +20,10 @@ class Seed extends Model
         'harvest_end' => 'date',
     ];
 
+    protected $appends = [
+      'public_image_url'
+    ];
+
     public function inventory() {
         return $this->hasMany(SeedInventory::class);
     }

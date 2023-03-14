@@ -1,6 +1,11 @@
 <?php
 
+use App\Http\Controllers\CalendarController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SeedsController;
+use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,13 +18,27 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+
 Route::get('/', function () {
-    return view('dashboard');
+    return Inertia::render('Welcome', [
+        'canLogin' => Route::has('login'),
+        'canRegister' => Route::has('register'),
+    ]);
 });
 
-Route::get('seeds', function () {
-    $seeds = \App\Models\Seed::all();
-    return view('seeds', ['seeds' => $seeds]);
+Route::get('/dashboard', function () {
+    return Inertia::render('Dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::get('calendar', \App\Http\Controllers\CalendarController::class);
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/seeds', [SeedsController::class, 'index'])->name('seeds.index');
+    Route::get('/calendar', [CalendarController::class, 'index'])->name('calendar.index');
+});
+
+require __DIR__.'/auth.php';

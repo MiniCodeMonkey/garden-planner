@@ -5,16 +5,25 @@ namespace App\Http\Controllers;
 use App\Models\Seed;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class CalendarController extends Controller
 {
-    public function __invoke()
+    /**
+     * Display the user's profile form.
+     */
+    public function index(Request $request): Response
     {
         $seeds = Seed::all();
         $eventDates = $this->expandDates($seeds);
-        $dates = $this->buildDates($eventDates, date('Y'), date('m'));
+        $days = $this->buildDays($eventDates, date('Y'), date('m'));
 
-        return view('calendar', ['seeds' => $seeds, 'dates' => $dates]);
+        return Inertia::render('Calendar/Index', [
+            'seeds' => $seeds,
+            'days' => $days,
+        ]);
     }
 
     private function expandDates(Collection $seeds)
@@ -50,9 +59,9 @@ class CalendarController extends Controller
         return $dates;
     }
 
-    private function buildDates(array $eventDates, int $year, int $month)
+    private function buildDays(array $eventDates, int $year, int $month)
     {
-        $dates = [];
+        $days = [];
         $parsedYearMonth = Carbon::parse($year . '-' . $month . '-01');
 
         $date = $parsedYearMonth->copy()->startOfMonth()->startOfWeek();
@@ -60,7 +69,7 @@ class CalendarController extends Controller
 
         while ($date->lessThan($endDate)) {
             $formattedDate = $date->format('Y-m-d');
-            $dates[] = [
+            $days[] = [
                 'date' => $formattedDate,
                 'isCurrentMonth' => $date->isCurrentMonth(),
                 'events' => $eventDates[$formattedDate] ?? [],
@@ -68,6 +77,6 @@ class CalendarController extends Controller
             $date->addDay();
         }
 
-        return $dates;
+        return $days;
     }
 }
