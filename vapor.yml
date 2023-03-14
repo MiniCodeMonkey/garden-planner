@@ -2,6 +2,7 @@ id: 41716
 name: garden-planner
 environments:
     production:
+        domain: gardenplan.app
         storage: garden-planner-assets
         database: vapor
         memory: 1024
