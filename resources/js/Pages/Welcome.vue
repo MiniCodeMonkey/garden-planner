@@ -12,7 +12,7 @@ defineProps({
     <Head title="Welcome" />
 
     <div
-        class="relative sm:flex sm:justify-center sm:items-center min-h-screen bg-center bg-green-600 selection:bg-red-500 selection:text-white"
+        class="relative sm:flex sm:justify-center sm:items-center min-h-screen bg-center selection:text-white"
     >
         <div v-if="canLogin" class="sm:fixed sm:top-0 sm:right-0 p-6 text-right">
             <Link

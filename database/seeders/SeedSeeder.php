@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\User;
 use Carbon\Carbon;
 use DOMDocument;
 use Illuminate\Database\Seeder;
@@ -11,7 +12,7 @@ use Illuminate\Support\Facades\Storage;
 
 class SeedSeeder extends Seeder
 {
-    const IMPORT_DATE_FORMAT = 'd/m/Y';
+    const IMPORT_DATE_FORMAT = 'm/d/Y';
 
     /**
      * Run the database seeds.
@@ -20,13 +21,15 @@ class SeedSeeder extends Seeder
      */
     public function run()
     {
+        $user = User::findOrFail(1);
+
         $rows = collect(file(__DIR__  . '/inventory.csv'))
             ->map(fn ($row) => str_getcsv($row));
 
         $headers = $rows->shift();
 
         $rows->map(fn($row) => array_combine($headers, $row))
-            ->each(function ($row) {
+            ->each(function ($row) use ($user) {
                 echo $row['Name'] . PHP_EOL;
 
                 $seed = new Seed();
@@ -59,7 +62,7 @@ class SeedSeeder extends Seeder
                 $seed->inventory_last_checked = str_contains($row['Inventory last updated'], '/') ? Carbon::createFromFormat(self::IMPORT_DATE_FORMAT, $row['Inventory last updated']) : null;
                 $seed->notes = $row['Notes'] ?? null;
 
-                $seed->save();
+                $user->seeds()->save($seed);
 
                 $inventory = new SeedInventory();
                 $inventory->quantity = $row['Total seeds'];

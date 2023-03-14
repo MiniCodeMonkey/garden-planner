@@ -52,4 +52,8 @@ class User extends Authenticatable
             get: fn() => 'https://www.gravatar.com/avatar/' . md5(strtolower(trim($this->email))) . '?s=256'
         );
     }
+
+    public function seeds() {
+        return $this->hasMany(Seed::class);
+    }
 }

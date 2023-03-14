@@ -16,6 +16,8 @@ return new class extends Migration
         Schema::create('seeds', function (Blueprint $table) {
             $table->id();
 
+            $table->foreignId('user_id')->constrained();
+
             $table->string('name');
             $table->string('image_filename')->nullable();
             $table->string('variety')->nullable();

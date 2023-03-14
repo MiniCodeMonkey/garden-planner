@@ -22,4 +22,9 @@ php artisan migrate
 # Start development server and frontend asset watcher
 php artisan serve
 npm run dev
+
+# Go to http://localhost:8000/register and create a new account
+
+# Seed initial data for user id 1
+php artisan db:seed
 ```
