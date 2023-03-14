@@ -71,6 +71,7 @@ class CalendarController extends Controller
             $formattedDate = $date->format('Y-m-d');
             $days[] = [
                 'date' => $formattedDate,
+                'isToday' => $date->isToday(),
                 'isCurrentMonth' => $date->isCurrentMonth(),
                 'events' => $eventDates[$formattedDate] ?? [],
             ];

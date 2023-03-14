@@ -12,6 +12,7 @@ class Seed extends Model
     use HasFactory;
 
     protected $casts = [
+        'green_house' => 'bool',
         'seeding_start' => 'date',
         'seeding_end' => 'date',
         'planting_start' => 'date',
@@ -21,14 +22,21 @@ class Seed extends Model
     ];
 
     protected $appends = [
-      'public_image_url'
+        'public_image_url'
     ];
 
-    public function inventory() {
+    public function inventory()
+    {
         return $this->hasMany(SeedInventory::class);
     }
 
-    public function publicImageUrl(): Attribute {
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function publicImageUrl(): Attribute
+    {
         return Attribute::make(
             get: fn() => $this->image_filename
                 ? Storage::url($this->image_filename)

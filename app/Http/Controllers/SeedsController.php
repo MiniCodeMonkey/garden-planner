@@ -2,26 +2,27 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\ProfileUpdateRequest;
 use App\Models\Seed;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class SeedsController extends Controller
 {
-    /**
-     * Display the user's profile form.
-     */
     public function index(Request $request): Response
     {
-        $seeds = Seed::all();
+        $seeds = $request->user()->seeds;
         return Inertia::render('Seeds/Index', [
             'seeds' => $seeds
+        ]);
+    }
+
+    public function show(Request $request, Seed $seed): Response
+    {
+        abort_unless($seed->user->id === $request->user()->id, 403);
+
+        return Inertia::render('Seeds/Show', [
+            'seed' => $seed
         ]);
     }
 }

@@ -38,6 +38,7 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/seeds', [SeedsController::class, 'index'])->name('seeds.index');
+    Route::get('/seeds/{seed}', [SeedsController::class, 'show'])->name('seeds.show');
     Route::get('/calendar', [CalendarController::class, 'index'])->name('calendar.index');
 });
 
