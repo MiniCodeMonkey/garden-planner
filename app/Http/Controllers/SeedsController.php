@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Seed;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -15,6 +17,28 @@ class SeedsController extends Controller
         return Inertia::render('Seeds/Index', [
             'seeds' => $seeds
         ]);
+    }
+
+    public function create(Request $request): Response
+    {
+        return Inertia::render('Seeds/Create');
+    }
+
+    public function store(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'name' => 'required',
+            'category' => 'required'
+        ]);
+
+        $seed = new Seed();
+        $seed->name = $request->input('name');
+        $seed->variety = $request->input('variety');
+        $seed->category = $request->input('category');
+
+        $request->user()->seeds()->save($seed);
+
+        return Redirect::route('seeds.show', $seed);
     }
 
     public function show(Request $request, Seed $seed): Response

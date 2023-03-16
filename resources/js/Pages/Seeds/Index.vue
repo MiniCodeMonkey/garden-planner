@@ -9,11 +9,18 @@ defineProps({
 </script>
 
 <template>
-    <Head title="Profile"/>
+    <Head title="Seeds"/>
 
     <AuthenticatedLayout>
         <template #header>
             Seeds
+        </template>
+
+        <template #headeraction>
+            <Link href="seeds/create"
+                  class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-25 transition ease-in-out duration-150">
+                Add new seed
+            </Link>
         </template>
 
         <ul role="list" class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">

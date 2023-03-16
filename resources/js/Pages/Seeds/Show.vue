@@ -3,7 +3,7 @@ import {ref} from 'vue'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import {Head} from '@inertiajs/vue3';
 import dayjs from 'dayjs'
-import {SparklesIcon} from '@heroicons/vue/24/outline'
+import {PencilSquareIcon, SparklesIcon} from '@heroicons/vue/24/outline'
 
 defineProps({
     seed: Object,
@@ -42,6 +42,12 @@ const currentTab = ref('Details')
                                     <SparklesIcon class="-ml-0.5 h-5 w-5 text-gray-400" aria-hidden="true"/>
                                     Plant
                                 </button>
+
+                                <button type="button"
+                                        class="inline-flex justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+                                    <PencilSquareIcon class="-ml-0.5 h-5 w-5 text-gray-400" aria-hidden="true"/>
+                                    Edit
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -70,7 +76,7 @@ const currentTab = ref('Details')
                 <dl class="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">
                     <div class="sm:col-span-1">
                         <dt class="text-sm font-medium text-gray-500">Variety</dt>
-                        <dd class="mt-1 text-sm text-gray-900">{{ seed.variety }}</dd>
+                        <dd class="mt-1 text-sm text-gray-900">{{ seed.variety || 'Unknown' }}</dd>
                     </div>
 
                     <div class="sm:col-span-1">
@@ -78,7 +84,7 @@ const currentTab = ref('Details')
                         <dd class="mt-1 text-sm text-gray-900">{{ seed.category }}</dd>
                     </div>
 
-                    <div class="sm:col-span-1" v-if="seed.link.length > 0">
+                    <div class="sm:col-span-1" v-if="seed.link && seed.link.length > 0">
                         <dt class="text-sm font-medium text-gray-500">Reference</dt>
                         <dd class="mt-1 text-sm text-gray-900"><a :href="seed.link" target="_blank">{{ seed.link }}</a>
                         </dd>
@@ -89,7 +95,7 @@ const currentTab = ref('Details')
                         <dd class="mt-1 text-sm text-gray-900">{{ seed.green_house ? 'Yes' : 'No' }}</dd>
                     </div>
 
-                    <div class="sm:col-span-1">
+                    <div class="sm:col-span-1" v-if="seed.inventory_last_checked">
                         <dt class="text-sm font-medium text-gray-500">Inventory last checked</dt>
                         <dd class="mt-1 text-sm text-gray-900">{{
                                 dayjs(seed.inventory_last_checked).format('D/M/YYYY')
@@ -97,7 +103,7 @@ const currentTab = ref('Details')
                         </dd>
                     </div>
 
-                    <div class="sm:col-span-2" v-if="seed.notes.length > 0">
+                    <div class="sm:col-span-2" v-if="seed.notes && seed.notes.length > 0">
                         <dt class="text-sm font-medium text-gray-500">Notes</dt>
                         <dd class="mt-1 max-w-prose space-y-5 text-sm text-gray-900" v-html="seed.notes"/>
                     </div>
@@ -106,7 +112,7 @@ const currentTab = ref('Details')
 
             <div class="mx-auto mt-6 max-w-5xl px-4 sm:px-6 lg:px-8" v-if="currentTab === 'Planting'">
                 <dl class="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">
-                    <div class="sm:col-span-1">
+                    <div class="sm:col-span-1" v-if="seed.sprouting_time_days_min">
                         <dt class="text-sm font-medium text-gray-500">Sprouting time</dt>
                         <dd class="mt-1 text-sm text-gray-900">{{
                                 seed.sprouting_time_days_max.length > 0 ? seed.sprouting_time_days_min + ' ' + seed.sprouting_time_days_max : seed.sprouting_time_days_min
@@ -114,17 +120,17 @@ const currentTab = ref('Details')
                         </dd>
                     </div>
 
-                    <div class="sm:col-span-1">
+                    <div class="sm:col-span-1" v-if="seed.sun && seed.sun.length > 0">
                         <dt class="text-sm font-medium text-gray-500">Sun</dt>
                         <dd class="mt-1 text-sm text-gray-900">{{ seed.sun }}</dd>
                     </div>
 
-                    <div class="sm:col-span-1">
+                    <div class="sm:col-span-1" v-if="seed.height && seed.height > 0">
                         <dt class="text-sm font-medium text-gray-500">Height</dt>
                         <dd class="mt-1 text-sm text-gray-900">{{ seed.height }}cm</dd>
                     </div>
 
-                    <div class="sm:col-span-1">
+                    <div class="sm:col-span-1" v-if="seed.seed_distance_min">
                         <dt class="text-sm font-medium text-gray-500">Seed distance</dt>
                         <dd class="mt-1 text-sm text-gray-900">{{
                                 seed.seed_distance_max.length > 0 ? seed.seed_distance_min + ' ' + seed.seed_distance_max : seed.seed_distance_min
@@ -132,7 +138,7 @@ const currentTab = ref('Details')
                         </dd>
                     </div>
 
-                    <div class="sm:col-span-1">
+                    <div class="sm:col-span-1" v-if="seed.seed_depth && seed.seed_depth > 0">
                         <dt class="text-sm font-medium text-gray-500">Seed depth</dt>
                         <dd class="mt-1 text-sm text-gray-900">{{ seed.seed_depth }}cm</dd>
                     </div>
