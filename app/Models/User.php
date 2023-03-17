@@ -47,13 +47,20 @@ class User extends Authenticatable
         'photo_url',
     ];
 
-    public function photoUrl(): Attribute {
+    public function photoUrl(): Attribute
+    {
         return Attribute::make(
             get: fn() => 'https://www.gravatar.com/avatar/' . md5(strtolower(trim($this->email))) . '?s=256'
         );
     }
 
-    public function seeds() {
+    public function seeds()
+    {
         return $this->hasMany(Seed::class);
+    }
+
+    public function gardens()
+    {
+        return $this->hasMany(Garden::class);
     }
 }

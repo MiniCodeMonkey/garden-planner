@@ -9,6 +9,10 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import {Menu, MenuButton, MenuItem, MenuItems} from '@headlessui/vue'
 import {ChevronDownIcon} from '@heroicons/vue/20/solid'
 
+const props = defineProps({
+    gardens: Array,
+});
+
 const GardenShapes = [
     'Rectangle',
     'Polygon',
@@ -28,12 +32,8 @@ var geojson = {
 
 var gardensCollection = {
     'type': 'FeatureCollection',
-    'features': []
+    'features': props.gardens.map(garden => garden.geojson)
 };
-
-const props = defineProps({
-    gardens: Array,
-});
 
 const mapContainer = shallowRef(null);
 const map = shallowRef(null);
@@ -56,6 +56,12 @@ function createGarden(feature) {
 
     editGarden.value = false;
     statusText.value = '';
+
+    const name = prompt('What should we call this lovely garden?');
+
+    axios.post('gardens', {name, geojson: feature, area: turf.area(feature)})
+        .then(response => console.log(response))
+        .catch(err => console.error(err));
 }
 
 onMounted(() => {
@@ -153,6 +159,8 @@ onMounted(() => {
                 'text-size': 8
             }
         });
+
+        map.value.getSource('gardensCollection').setData(gardensCollection);
 
         map.value.on('click', function (e) {
             if (editGarden.value) {

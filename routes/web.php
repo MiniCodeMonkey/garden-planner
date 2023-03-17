@@ -37,12 +37,10 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/seeds', [SeedsController::class, 'index'])->name('seeds.index');
-    Route::get('/seeds/create', [SeedsController::class, 'create'])->name('seeds.create');
-    Route::post('/seeds', [SeedsController::class, 'store'])->name('seeds.store');
-    Route::get('/seeds/{seed}', [SeedsController::class, 'show'])->name('seeds.show');
-    Route::get('/calendar', [CalendarController::class, 'index'])->name('calendar.index');
-    Route::get('/garden', [GardensController::class, 'index'])->name('gardens.index');
+    Route::resource('seeds', SeedsController::class);
+    Route::resource('gardens', GardensController::class)->except(['create', 'edit']);
+
+    Route::get('calendar', [CalendarController::class, 'index'])->name('calendar.index');
 });
 
 require __DIR__ . '/auth.php';

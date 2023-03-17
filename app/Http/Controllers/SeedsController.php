@@ -49,4 +49,19 @@ class SeedsController extends Controller
             'seed' => $seed
         ]);
     }
+
+    public function edit(Request $request, Seed $seed): Response
+    {
+        // TODO
+    }
+
+    public function update(Request $request, Seed $seed): Response
+    {
+        // TODO
+    }
+
+    public function destroy(Request $request, Seed $seed): Response
+    {
+        // TODO
+    }
 }
