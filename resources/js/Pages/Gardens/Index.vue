@@ -4,8 +4,22 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import {Head} from '@inertiajs/vue3';
 import {Map, NavigationControl} from 'maplibre-gl';
 import * as turf from '@turf/turf';
-import {markRaw, onMounted, onUnmounted, ref, shallowRef, watch} from 'vue';
+import {markRaw, onMounted, onUnmounted, ref, shallowRef} from 'vue';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import {Menu, MenuButton, MenuItem, MenuItems} from '@headlessui/vue'
+import {ChevronDownIcon} from '@heroicons/vue/20/solid'
+
+const GardenShapes = [
+    'Rectangle',
+    'Polygon',
+    'Circle',
+]
+
+const DefaultStatusText = {
+    'Rectangle': 'Click where the first corner of your garden starts',
+    'Polygon': 'Finish by clicking on the first point again',
+    'Circle': 'Not implemented yet',
+}
 
 var geojson = {
     'type': 'FeatureCollection',
@@ -24,13 +38,25 @@ const props = defineProps({
 const mapContainer = shallowRef(null);
 const map = shallowRef(null);
 const editGarden = ref(false);
+const gardenShape = ref('Rectangle');
+const statusText = ref();
 
-watch(editGarden, (editGarden, prevEditGarden) => {
-    if (editGarden && !prevEditGarden) {
-        geojson.features = [];
-        map.value.getSource('geojson').setData(geojson);
-    }
-})
+function startEditGarden(shape) {
+    editGarden.value = true;
+    gardenShape.value = shape;
+    statusText.value = DefaultStatusText[shape];
+    geojson.features = [];
+    map.value.getSource('geojson').setData(geojson);
+}
+
+function createGarden(feature) {
+    gardensCollection.features.push(feature);
+    map.value.getSource('gardensCollection').setData(gardensCollection);
+    geojson.features = [];
+
+    editGarden.value = false;
+    statusText.value = '';
+}
 
 onMounted(() => {
     const initialState = {lng: 11.8985, lat: 55.10555, zoom: 10};
@@ -43,7 +69,6 @@ onMounted(() => {
     }));
     map.value.addControl(new NavigationControl(), 'top-right');
 
-    // Used to draw a line between points
     var linestring = {
         'type': 'Feature',
         'properties': {},
@@ -64,7 +89,7 @@ onMounted(() => {
             'data': gardensCollection
         });
 
-        // Add styles to the map
+        // Styles
         map.value.addLayer({
             id: 'measure-points',
             type: 'circle',
@@ -131,63 +156,77 @@ onMounted(() => {
 
         map.value.on('click', function (e) {
             if (editGarden.value) {
-                var features = map.value.queryRenderedFeatures(e.point, {
+                var selectedFeatures = map.value.queryRenderedFeatures(e.point, {
                     layers: ['measure-points']
                 });
 
-                // Remove the linestring from the group
-                // So we can redraw it based on the points collection
-                if (geojson.features.length > 1) geojson.features.pop();
+                if (gardenShape.value === 'Rectangle') {
+                    if (selectedFeatures.length <= 0) {
+                        if (geojson.features.length > 0) {
+                            var line = turf.lineString([geojson.features[0].geometry.coordinates, [e.lngLat.lng, e.lngLat.lat]]);
+                            var bbox = turf.bbox(line);
+                            var bboxPolygon = turf.bboxPolygon(bbox);
 
-                // If a feature was clicked, remove it from the map
-                if (features.length) {
-                    var id = features[0].properties.id;
+                            createGarden(bboxPolygon);
+                        } else {
+                            var point = {
+                                'type': 'Feature',
+                                'geometry': {
+                                    'type': 'Point',
+                                    'coordinates': [e.lngLat.lng, e.lngLat.lat]
+                                },
+                                'properties': {
+                                    'id': String(new Date().getTime())
+                                }
+                            };
 
-                    if (id === geojson.features[0].properties.id) {
-                        var points = geojson.features
-                            .filter(feature => feature.geometry.type === 'Point')
-                            .map(feature => feature.geometry.coordinates);
-                        points.push(points[0]);
-
-                        var line = turf.lineString(points);
-                        var polygon = turf.lineToPolygon(line);
-
-                        var area = turf.area(polygon);
-                        console.log(area);
-
-                        polygon.properties.area = Math.round(area).toLocaleString() + ' m2';
-
-                        gardensCollection.features.push(polygon);
-                        map.value.getSource('gardensCollection').setData(gardensCollection);
-                        geojson.features = [];
-                        editGarden.value = false;
+                            geojson.features.push(point);
+                        }
                     }
-                } else {
-                    var point = {
-                        'type': 'Feature',
-                        'geometry': {
-                            'type': 'Point',
-                            'coordinates': [e.lngLat.lng, e.lngLat.lat]
-                        },
-                        'properties': {
-                            'id': String(new Date().getTime())
+                } else if (gardenShape.value === 'Polygon') {
+                    if (geojson.features.length > 1) {
+                        geojson.features.pop();
+                    }
+
+                    if (selectedFeatures.length) {
+                        // If the first feature was clicked
+                        var id = selectedFeatures[0].properties.id;
+                        if (id === geojson.features[0].properties.id) {
+                            var points = geojson.features
+                                .filter(feature => feature.geometry.type === 'Point')
+                                .map(feature => feature.geometry.coordinates);
+
+                            points.push(points[0]);
+
+                            var line = turf.lineString(points);
+                            var polygon = turf.lineToPolygon(line);
+                            createGarden(polygon);
                         }
-                    };
+                    } else {
+                        var point = {
+                            'type': 'Feature',
+                            'geometry': {
+                                'type': 'Point',
+                                'coordinates': [e.lngLat.lng, e.lngLat.lat]
+                            },
+                            'properties': {
+                                'id': String(new Date().getTime())
+                            }
+                        };
+                        geojson.features.push(point);
+                    }
 
-                    geojson.features.push(point);
-                }
-
-                if (geojson.features.length > 1) {
-                    linestring.geometry.coordinates = geojson.features.map(
-                        function (point) {
-                            return point.geometry.coordinates;
-                        }
-                    );
-
-                    linestring.properties.distance = Math.round((turf.length(linestring) * 1000)).toLocaleString() + ' meters';
-                    geojson.features.push(linestring);
-
-                    console.log(geojson.features);
+                    if (geojson.features.length > 1) {
+                        // Create line through points
+                        linestring.geometry.coordinates = geojson.features.map(
+                            function (point) {
+                                return point.geometry.coordinates;
+                            }
+                        );
+                        geojson.features.push(linestring);
+                    }
+                } else if (gardenShape.value === 'Circle') {
+                    alert('Not implemented yet');
                 }
 
                 map.value.getSource('geojson').setData(geojson);
@@ -205,6 +244,16 @@ onMounted(() => {
             map.value.getCanvas().style.cursor = features.length
                 ? 'pointer'
                 : 'crosshair';
+
+            if (gardenShape.value === 'Rectangle') {
+                if (geojson.features.length > 0) {
+                    const line = turf.lineString([geojson.features[0].geometry.coordinates, [e.lngLat.lng, e.lngLat.lat]]);
+                    var bbox = turf.bbox(line);
+                    const width = Math.round(turf.distance([bbox[0], bbox[1]], [bbox[2], bbox[3]], {units: "centimeters"}));
+                    const height = Math.round(turf.distance([bbox[0], bbox[1]], [bbox[0], bbox[3]], {units: "centimeters"}));
+                    statusText.value = `${width}cm x ${height}cm`
+                }
+            }
         } else {
             map.value.getCanvas().style.cursor = '';
         }
@@ -224,9 +273,44 @@ onUnmounted(() => {
             Garden
         </template>
 
-        <div class="mb-8">
-            <PrimaryButton @click="editGarden = !editGarden" v-if="!editGarden">Add garden</PrimaryButton>
-            <PrimaryButton @click="editGarden = !editGarden" v-if="editGarden">Cancel add garden</PrimaryButton>
+        <div class="flex mb-8">
+            <div>{{ statusText }}</div>
+            <div class="ml-auto">
+                <div v-if="!editGarden" class="inline-flex rounded-md shadow-sm">
+                    <button type="button"
+                            class="relative inline-flex items-center rounded-l-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-10">
+                        Add garden
+                    </button>
+                    <Menu as="div" class="relative -ml-px block">
+                        <MenuButton
+                            class="relative inline-flex items-center rounded-r-md bg-white px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-10">
+                            <span class="sr-only">Open options</span>
+                            <ChevronDownIcon class="h-5 w-5" aria-hidden="true"/>
+                        </MenuButton>
+                        <transition enter-active-class="transition ease-out duration-100"
+                                    enter-from-class="transform opacity-0 scale-95"
+                                    enter-to-class="transform opacity-100 scale-100"
+                                    leave-active-class="transition ease-in duration-75"
+                                    leave-from-class="transform opacity-100 scale-100"
+                                    leave-to-class="transform opacity-0 scale-95">
+                            <MenuItems
+                                class="absolute right-0 z-10 mt-2 -mr-1 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                                <div class="py-1">
+                                    <MenuItem v-for="shape in GardenShapes" :key="shape" v-slot="{ active }">
+                                        <button
+                                            @click="startEditGarden(shape)"
+                                            :class="[active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'w-full text-left block px-4 py-2 text-sm']">
+                                            {{ shape }}
+                                        </button>
+                                    </MenuItem>
+                                </div>
+                            </MenuItems>
+                        </transition>
+                    </Menu>
+                </div>
+
+                <PrimaryButton v-if="editGarden" @click="editGarden = false">Cancel</PrimaryButton>
+            </div>
         </div>
 
         <div class="w-full h-[500px] relative">
