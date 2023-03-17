@@ -50,8 +50,6 @@ function startEditGarden(shape) {
 }
 
 function createGarden(feature) {
-    gardensCollection.features.push(feature);
-    map.value.getSource('gardensCollection').setData(gardensCollection);
     geojson.features = [];
 
     editGarden.value = false;
@@ -59,8 +57,11 @@ function createGarden(feature) {
 
     const name = prompt('What should we call this lovely garden?');
 
-    axios.post('gardens', {name, geojson: feature, area: turf.area(feature)})
-        .then(response => console.log(response))
+    axios.post('gardens', {name, geojson: feature, area: turf.area(feature, {units: "centimeters"})})
+        .then(response => {
+            gardensCollection.features.push(response.data.geojson);
+            map.value.getSource('gardensCollection').setData(gardensCollection);
+        })
         .catch(err => console.error(err));
 }
 
