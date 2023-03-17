@@ -129,7 +129,10 @@ const selectedDay = props.days.find((day) => day.isSelected)
                                         </p>
                                     </a>
                                 </li>
-                                <li v-if="day.events.length > 2" class="text-gray-500">+ {{ day.events.length - 2 }}
+                                <li v-if="day.events.length > 2" class="text-gray-500"
+                                    :title="day.events.map(event => event.name).join(', ')">+ {{
+                                        day.events.length - 2
+                                    }}
                                     more
                                 </li>
                             </ol>
