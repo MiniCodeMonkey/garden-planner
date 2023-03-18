@@ -22,7 +22,8 @@ class Seed extends Model
     ];
 
     protected $appends = [
-        'public_image_url'
+        'public_image_url',
+        'quantity'
     ];
 
     public function inventory()
@@ -41,6 +42,13 @@ class Seed extends Model
             get: fn() => $this->image_filename
                 ? Storage::url($this->image_filename)
                 : asset('plant.png')
+        );
+    }
+
+    public function quantity(): Attribute
+    {
+        return Attribute::make(
+            get: fn() => $this->inventory()->sum('quantity')
         );
     }
 }

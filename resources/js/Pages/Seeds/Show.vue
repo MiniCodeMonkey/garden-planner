@@ -84,6 +84,11 @@ const currentTab = ref('Details')
                         <dd class="mt-1 text-sm text-gray-900">{{ seed.category }}</dd>
                     </div>
 
+                    <div class="sm:col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">Inventory</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ seed.quantity }} seeds</dd>
+                    </div>
+
                     <div class="sm:col-span-1" v-if="seed.link && seed.link.length > 0">
                         <dt class="text-sm font-medium text-gray-500">Reference</dt>
                         <dd class="mt-1 text-sm text-gray-900"><a :href="seed.link" target="_blank">{{ seed.link }}</a>
