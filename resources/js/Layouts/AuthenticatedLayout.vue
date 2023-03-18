@@ -16,6 +16,13 @@ const userNavigation = [
     {name: 'Your Profile', href: route('profile.edit')},
     {name: 'Sign out', href: route('logout'), method: 'post'},
 ]
+
+defineProps({
+    mainAsCard: {
+        type: Boolean,
+        default: true,
+    },
+});
 </script>
 
 <template>
@@ -150,10 +157,13 @@ const userNavigation = [
 
         <main class="-mt-32">
             <div class="mx-auto max-w-7xl px-4 pb-12 sm:px-6 lg:px-8">
-                <div class="overflow-hidden rounded-lg bg-white shadow">
+                <div v-if="mainAsCard" class="overflow-hidden rounded-lg bg-white shadow">
                     <div class="px-4 py-5 sm:p-6">
                         <slot/>
                     </div>
+                </div>
+                <div v-else>
+                    <slot/>
                 </div>
             </div>
         </main>
