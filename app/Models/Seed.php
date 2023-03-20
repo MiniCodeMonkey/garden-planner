@@ -5,11 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
 
 class Seed extends Model
 {
     use HasFactory;
+    use SoftDeletes;
 
     protected $casts = [
         'green_house' => 'bool',
@@ -29,6 +31,11 @@ class Seed extends Model
     public function inventory()
     {
         return $this->hasMany(SeedInventory::class);
+    }
+
+    public function germinations()
+    {
+        return $this->hasMany(Germination::class);
     }
 
     public function user()

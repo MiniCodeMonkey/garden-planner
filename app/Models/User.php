@@ -63,4 +63,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Garden::class);
     }
+
+    public function germinations()
+    {
+        return $this->hasManyThrough(Germination::class, Seed::class);
+    }
 }

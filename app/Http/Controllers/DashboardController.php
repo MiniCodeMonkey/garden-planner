@@ -11,15 +11,19 @@ class DashboardController extends Controller
     public function __invoke(Request $request): Response
     {
         $user = $request->user();
-        $seedsToSeed = $user->seeds()->where('seeding_start', '<=', now())
+        $seedsToSeed = $user->seeds()
+            ->where('seeding_start', '<=', now())
             ->where('seeding_end', '>=', now())
+            ->doesntHave('germinations')
             ->get();
 
-        $seedsToPlant = $user->seeds()->where('planting_start', '<=', now())
+        $seedsToPlant = $user->seeds()
+            ->where('planting_start', '<=', now())
             ->where('planting_end', '>=', now())
             ->get();
 
-        $seedsToHarvest = $user->seeds()->where('harvest_start', '<=', now())
+        $seedsToHarvest = $user->seeds()
+            ->where('harvest_start', '<=', now())
             ->where('harvest_end', '>=', now())
             ->get();
 

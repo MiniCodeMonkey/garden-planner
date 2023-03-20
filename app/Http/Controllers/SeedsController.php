@@ -46,7 +46,8 @@ class SeedsController extends Controller
         abort_unless($seed->user->id === $request->user()->id, 403);
 
         return Inertia::render('Seeds/Show', [
-            'seed' => $seed
+            'seed' => $seed,
+            'germinations' => $seed->germinations,
         ]);
     }
 
@@ -60,8 +61,11 @@ class SeedsController extends Controller
         // TODO
     }
 
-    public function destroy(Request $request, Seed $seed): Response
+    public function destroy(Request $request, Seed $seed): RedirectResponse
     {
-        // TODO
+        abort_unless($seed->user->id === $request->user()->id, 403);
+        $seed->delete();
+
+        return Redirect::route('dashboard');
     }
 }

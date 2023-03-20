@@ -1,12 +1,13 @@
 <script setup>
 import {ref} from 'vue'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import {Head} from '@inertiajs/vue3';
+import {Head, Link} from '@inertiajs/vue3';
 import dayjs from 'dayjs'
-import {PencilSquareIcon, SparklesIcon} from '@heroicons/vue/24/outline'
+import {ArchiveBoxIcon, PencilSquareIcon, SparklesIcon} from '@heroicons/vue/24/outline'
 
 defineProps({
     seed: Object,
+    germinations: Array,
 });
 
 const tabs = [
@@ -37,17 +38,29 @@ const currentTab = ref('Details')
                             </div>
                             <div
                                 class="justify-stretch mt-6 flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-4">
-                                <button type="button"
-                                        class="inline-flex justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+
+                                <Link :href="route('germinations.create', { seed: seed.id })"
+                                      class="inline-flex justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                                     <SparklesIcon class="-ml-0.5 h-5 w-5 text-gray-400" aria-hidden="true"/>
-                                    Plant
-                                </button>
+                                    Germinate
+                                </Link>
 
                                 <button type="button"
                                         class="inline-flex justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                                     <PencilSquareIcon class="-ml-0.5 h-5 w-5 text-gray-400" aria-hidden="true"/>
                                     Edit
                                 </button>
+
+                                <Link
+                                    :href="route('seeds.destroy', seed.id)"
+                                    method="delete"
+                                    as="button"
+                                    class="inline-flex justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                                >
+                                    <ArchiveBoxIcon class="-ml-0.5 h-5 w-5 text-gray-400" aria-hidden="true"/>
+                                    Hide for the season
+                                </Link
+                                >
                             </div>
                         </div>
                     </div>
@@ -146,6 +159,23 @@ const currentTab = ref('Details')
                     <div class="sm:col-span-1" v-if="seed.seed_depth && seed.seed_depth > 0">
                         <dt class="text-sm font-medium text-gray-500">Seed depth</dt>
                         <dd class="mt-1 text-sm text-gray-900">{{ seed.seed_depth }}cm</dd>
+                    </div>
+
+                    <div v-if="germinations.length > 0" class="sm:col-span-2">
+                        <dt class="text-sm font-medium text-gray-500">Germinations</dt>
+                        <dd class="mt-1 text-sm text-gray-900">
+                            <ul>
+                                <li v-for="germination in germinations" :key="germination.id">
+                                    <Link :href="route('germinations.show', germination.id)">
+                                        {{ germination.quantity }}
+                                        on
+                                        {{ dayjs(germination.created_at).format('D/M') }}
+                                        in
+                                        {{ germination.location }}
+                                    </Link>
+                                </li>
+                            </ul>
+                        </dd>
                     </div>
                 </dl>
             </div>

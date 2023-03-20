@@ -21,7 +21,7 @@ defineProps({
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div class="overflow-hidden rounded-lg bg-white shadow">
                 <div class="px-4 py-5 sm:p-6">
-                    <h3 class="mb-4 text-base font-semibold leading-6 text-gray-900">Seed to start</h3>
+                    <h3 class="mb-4 text-base font-semibold leading-6 text-gray-900">Germinate</h3>
 
                     <div class="text-center" v-if="seedsToSeed.length <= 0">
                         <svg class="mx-auto h-12 w-12 text-gray-400" viewBox="0 0 512 512">
@@ -55,10 +55,10 @@ defineProps({
                                         <div class="flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
                                             <div>
                                                 <p class="text-sm text-gray-500">
-                                                    {{ seed.name }} <a :href="'seeds/' + seed.id"
-                                                                       class="font-medium text-gray-900">{{
-                                                        seed.variety
-                                                    }}</a>
+                                                    <a :href="'seeds/' + seed.id"
+                                                       class="font-medium text-gray-900">{{
+                                                            seed.variety
+                                                        }}</a> {{ seed.name }}
                                                 </p>
                                             </div>
                                             <div class="whitespace-nowrap text-right text-sm text-gray-500">
@@ -116,10 +116,10 @@ defineProps({
                                         <div class="flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
                                             <div>
                                                 <p class="text-sm text-gray-500">
-                                                    {{ seed.name }} <a :href="'seeds/' + seed.id"
-                                                                       class="font-medium text-gray-900">{{
-                                                        seed.variety
-                                                    }}</a>
+                                                    <a :href="'seeds/' + seed.id"
+                                                       class="font-medium text-gray-900">{{
+                                                            seed.variety
+                                                        }}</a> {{ seed.name }}
                                                 </p>
                                             </div>
                                             <div class="whitespace-nowrap text-right text-sm text-gray-500">
@@ -177,10 +177,10 @@ defineProps({
                                         <div class="flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
                                             <div>
                                                 <p class="text-sm text-gray-500">
-                                                    {{ seed.name }} <a :href="'seeds/' + seed.id"
-                                                                       class="font-medium text-gray-900">{{
-                                                        seed.variety
-                                                    }}</a>
+                                                    <a :href="'seeds/' + seed.id"
+                                                       class="font-medium text-gray-900">{{
+                                                            seed.variety
+                                                        }}</a> {{ seed.name }}
                                                 </p>
                                             </div>
                                             <div class="whitespace-nowrap text-right text-sm text-gray-500">
