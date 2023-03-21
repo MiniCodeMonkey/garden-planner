@@ -5,6 +5,7 @@ import {DocumentMagnifyingGlassIcon, SparklesIcon} from '@heroicons/vue/24/outli
 
 defineProps({
     seeds: Array,
+    searchQuery: String,
 });
 </script>
 
@@ -13,7 +14,7 @@ defineProps({
 
     <AuthenticatedLayout>
         <template #header>
-            Seeds
+            <span v-if="searchQuery">"{{ searchQuery }}"</span> Seeds
         </template>
 
         <template #headeraction>

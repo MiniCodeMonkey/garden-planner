@@ -3,7 +3,7 @@ import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import {Link} from '@inertiajs/vue3';
 import {Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItem, MenuItems} from '@headlessui/vue'
 import {MagnifyingGlassIcon} from '@heroicons/vue/20/solid'
-import {Bars3Icon, BellIcon, XMarkIcon} from '@heroicons/vue/24/outline'
+import {Bars3Icon, XMarkIcon} from '@heroicons/vue/24/outline'
 
 const navigation = [
     {name: 'Dashboard', href: '/dashboard', current: route().current('dashboard')},
@@ -54,9 +54,12 @@ defineProps({
                                     <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                                         <MagnifyingGlassIcon class="h-5 w-5" aria-hidden="true"/>
                                     </div>
-                                    <input id="search"
-                                           class="block w-full rounded-md border-0 bg-white py-1.5 pl-10 pr-3 text-gray-900 focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-green-600 sm:text-sm sm:leading-6"
-                                           placeholder="Search" type="search" name="search"/>
+                                    <form :action="route('seeds.index')" method="get">
+                                        <input id="search"
+                                               class="block w-full rounded-md border-0 bg-white py-1.5 pl-10 pr-3 text-gray-900 focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-green-600 sm:text-sm sm:leading-6"
+                                               placeholder="Search" type="search" name="search"
+                                               :value="$page.props.searchQuery"/>
+                                    </form>
                                 </div>
                             </div>
                         </div>
@@ -71,12 +74,6 @@ defineProps({
                         </div>
                         <div class="hidden lg:ml-4 lg:block">
                             <div class="flex items-center">
-                                <button type="button"
-                                        class="flex-shrink-0 rounded-full bg-green-600 p-1 text-green-200 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-green-600">
-                                    <span class="sr-only">View notifications</span>
-                                    <BellIcon class="h-6 w-6" aria-hidden="true"/>
-                                </button>
-
                                 <!-- Profile dropdown -->
                                 <Menu as="div" class="relative ml-3 flex-shrink-0">
                                     <div>
@@ -127,11 +124,6 @@ defineProps({
                                 <div class="text-base font-medium text-white">{{ $page.props.auth.user.name }}</div>
                                 <div class="text-sm font-medium text-green-300">{{ $page.props.auth.user.email }}</div>
                             </div>
-                            <button type="button"
-                                    class="ml-auto flex-shrink-0 rounded-full bg-green-600 p-1 text-green-200 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-green-600">
-                                <span class="sr-only">View notifications</span>
-                                <BellIcon class="h-6 w-6" aria-hidden="true"/>
-                            </button>
                         </div>
                         <div class="mt-3 space-y-1 px-2">
                             <DisclosureButton v-for="item in userNavigation" :key="item.name" as="a" :href="item.href"

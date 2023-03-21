@@ -13,9 +13,19 @@ class SeedsController extends Controller
 {
     public function index(Request $request): Response
     {
-        $seeds = $request->user()->seeds;
+        $searchQuery = $request->input('search');
+
+        if ($searchQuery) {
+            $seeds = $request->user()->seeds()
+                ->where('name', 'LIKE', '%' . $searchQuery . '%')
+                ->orWhere('variety', 'LIKE', '%' . $searchQuery . '%')
+                ->get();
+        } else {
+            $seeds = $request->user()->seeds;
+        }
         return Inertia::render('Seeds/Index', [
-            'seeds' => $seeds
+            'seeds' => $seeds,
+            'searchQuery' => $searchQuery,
         ]);
     }
 
