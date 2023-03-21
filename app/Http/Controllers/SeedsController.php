@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Seed;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
@@ -15,18 +16,77 @@ class SeedsController extends Controller
     {
         $searchQuery = $request->input('search');
 
+        $currentFilters = [
+            'search' => $searchQuery,
+            'sort' => $request->input('sort', 'newest'),
+            'category' => $request->input('category', []),
+            'sun' => $request->input('sun', []),
+            'greenhouse' => $request->input('greenhouse'),
+        ];
+
+        $seeds = $request->user()->seeds();
+
         if ($searchQuery) {
-            $seeds = $request->user()->seeds()
-                ->where('name', 'LIKE', '%' . $searchQuery . '%')
-                ->orWhere('variety', 'LIKE', '%' . $searchQuery . '%')
-                ->get();
-        } else {
-            $seeds = $request->user()->seeds;
+            $seeds->where(function ($query) use ($searchQuery) {
+                $query->where('name', 'LIKE', '%' . $searchQuery . '%')
+                    ->orWhere('variety', 'LIKE', '%' . $searchQuery . '%');
+            });
         }
+
+        if (count($currentFilters['category']) > 0) {
+            $seeds->where(function ($query) use ($currentFilters, $searchQuery) {
+                foreach ($currentFilters['category'] as $category) {
+                    $query->orWhere('category', $category);
+                }
+            });
+        }
+
+        if (count($currentFilters['sun']) > 0) {
+            $seeds->where(function ($query) use ($currentFilters, $searchQuery) {
+                foreach ($currentFilters['sun'] as $sun) {
+                    $query->orWhere('sun', $sun);
+                }
+            });
+        }
+
+        if ($currentFilters['greenhouse'] !== null) {
+            $seeds->where('green_house', $currentFilters['greenhouse'] === 'yes');
+        }
+
+        if ($currentFilters['sort'] === 'newest') {
+            $seeds->orderBy('created_at', 'desc');
+        } elseif ($currentFilters['sort'] === 'oldest') {
+            $seeds->orderBy('created_at', 'asc');
+        } elseif ($currentFilters['sort'] === 'most') {
+            $seeds->withSum('inventory', 'quantity')->orderBy('inventory_sum_quantity', 'desc');
+        } elseif ($currentFilters['sort'] === 'least') {
+            $seeds->withSum('inventory', 'quantity')->orderBy('inventory_sum_quantity', 'asc');
+        }
+
         return Inertia::render('Seeds/Index', [
-            'seeds' => $seeds,
-            'searchQuery' => $searchQuery,
+            'seeds' => $seeds->get(),
+            'filterOptions' => [
+                'category' => $this->getDistinctValues($request->user(), 'category'),
+                'sun' => $this->getDistinctValues($request->user(), 'sun'),
+            ],
+            'currentFilters' => $currentFilters
         ]);
+    }
+
+    private function getDistinctValues(User $user, string $column)
+    {
+        return $user->seeds()
+            ->select($column)
+            ->whereNotNull($column)
+            ->where($column, '!=', '')
+            ->groupBy($column)
+            ->pluck($column)
+            ->map(function ($item) {
+                return [
+                    'label' => $item,
+                    'value' => $item,
+                ];
+            });
     }
 
     public function create(Request $request): Response

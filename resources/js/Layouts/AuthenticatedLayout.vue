@@ -11,7 +11,6 @@ const navigation = [
     {name: 'Germinations', href: '/germinations', current: route().current('germinations.*')},
     {name: 'Gardens', href: '/gardens', current: route().current('garden')},
     {name: 'Calendar', href: '/calendar', current: route().current('calendar')},
-    {name: 'Reports', href: '/reports', current: route().current('reports')},
 ]
 const userNavigation = [
     {name: 'Your Profile', href: route('profile.edit')},
@@ -36,7 +35,10 @@ defineProps({
                         class="relative flex h-16 items-center justify-between lg:border-b lg:border-green-400 lg:border-opacity-25">
                         <div class="flex items-center px-2 lg:px-0">
                             <div class="flex-shrink-0">
-                                <ApplicationLogo class="block h-8 w-8"></ApplicationLogo>
+                                <Link :href="route('dashboard')">
+                                    <ApplicationLogo
+                                        class="block h-8 w-8 transition ease-in-out text-white hover:scale-150 hover:text-red-500 duration-300"></ApplicationLogo>
+                                </Link>
                             </div>
                             <div class="hidden lg:ml-10 lg:block">
                                 <div class="flex space-x-4">
