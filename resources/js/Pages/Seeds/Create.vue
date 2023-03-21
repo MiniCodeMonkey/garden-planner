@@ -49,7 +49,7 @@ const form = useForm({
                 </div>
 
                 <div>
-                    <InputLabel for="text" value="Variety"/>
+                    <InputLabel for="variety" value="Variety"/>
 
                     <TextInput
                         id="variety"
@@ -63,7 +63,7 @@ const form = useForm({
                 </div>
 
                 <div>
-                    <InputLabel for="text" value="Category"/>
+                    <InputLabel for="category" value="Category"/>
 
                     <TextInput
                         id="category"

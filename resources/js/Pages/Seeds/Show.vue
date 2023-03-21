@@ -38,18 +38,17 @@ const currentTab = ref('Details')
                             </div>
                             <div
                                 class="justify-stretch mt-6 flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-4">
-
                                 <Link :href="route('germinations.create', { seed: seed.id })"
                                       class="inline-flex justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                                     <SparklesIcon class="-ml-0.5 h-5 w-5 text-gray-400" aria-hidden="true"/>
                                     Germinate
                                 </Link>
 
-                                <button type="button"
-                                        class="inline-flex justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+                                <Link :href="route('seeds.edit', seed.id)"
+                                      class="inline-flex justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                                     <PencilSquareIcon class="-ml-0.5 h-5 w-5 text-gray-400" aria-hidden="true"/>
                                     Edit
-                                </button>
+                                </Link>
 
                                 <Link
                                     :href="route('seeds.destroy', seed.id)"
@@ -59,8 +58,7 @@ const currentTab = ref('Details')
                                 >
                                     <ArchiveBoxIcon class="-ml-0.5 h-5 w-5 text-gray-400" aria-hidden="true"/>
                                     Hide for the season
-                                </Link
-                                >
+                                </Link>
                             </div>
                         </div>
                     </div>

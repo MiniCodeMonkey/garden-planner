@@ -123,12 +123,45 @@ class SeedsController extends Controller
 
     public function edit(Request $request, Seed $seed): Response
     {
-        // TODO
+        abort_unless($seed->user->id === $request->user()->id, 403);
+
+        return Inertia::render('Seeds/Edit', [
+            'seed' => $seed
+        ]);
     }
 
-    public function update(Request $request, Seed $seed): Response
+    public function update(Request $request, Seed $seed): RedirectResponse
     {
-        // TODO
+        abort_unless($seed->user->id === $request->user()->id, 403);
+
+        $request->validate([
+            'name' => 'required',
+            'category' => 'required'
+        ]);
+
+        $seed->name = $request->input('name');
+        $seed->variety = $request->input('variety');
+        $seed->category = $request->input('category');
+        $seed->link = $request->input('link');
+        $seed->green_house = $request->input('green_house');
+        $seed->sprouting_time_days_min = $request->input('sprouting_time_days_min');
+        $seed->sprouting_time_days_max = $request->input('sprouting_time_days_max');
+        $seed->sun = $request->input('sun');
+        $seed->height = $request->input('height');
+        $seed->seed_distance_min = $request->input('seed_distance_min');
+        $seed->seed_distance_max = $request->input('seed_distance_max');
+        $seed->seed_depth = $request->input('seed_depth');
+        $seed->seeding_start = $request->input('seeding_start');
+        $seed->seeding_end = $request->input('seeding_end');
+        $seed->planting_start = $request->input('planting_start');
+        $seed->planting_end = $request->input('planting_end');
+        $seed->harvest_start = $request->input('harvest_start');
+        $seed->harvest_end = $request->input('harvest_end');
+        $seed->inventory_last_checked = $request->input('inventory_last_checked');
+        $seed->notes = $request->input('notes');
+        $seed->save();
+
+        return Redirect::route('seeds.show', $seed);
     }
 
     public function destroy(Request $request, Seed $seed): RedirectResponse
