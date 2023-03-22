@@ -14,6 +14,7 @@ class GardensController extends Controller
     {
         return Inertia::render('Gardens/Index', [
             'gardens' => $request->user()->gardens,
+            'plants' => $request->user()->plants,
         ]);
     }
 
