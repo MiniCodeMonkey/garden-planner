@@ -66,7 +66,16 @@ function createGarden(feature) {
 }
 
 onMounted(() => {
-    const initialState = {lng: 11.8985, lat: 55.10555, zoom: 10};
+    let center = null;
+    if (props.gardens && props.gardens.length > 0) {
+        center = turf.center(props.gardens[0].geojson)
+    }
+
+    const initialState = {
+        lng: center?.geometry.coordinates[0] || -34,
+        lat: center?.geometry.coordinates[1] || 42,
+        zoom: center ? 18 : 2
+    };
 
     map.value = markRaw(new Map({
         container: mapContainer.value,
