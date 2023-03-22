@@ -286,7 +286,7 @@ const open = ref(false)
                 <div>
                     <div class="-mt-px flex divide-x divide-gray-200">
                         <div class="flex w-0 flex-1">
-                            <Link :href="route('germinations.create', { seed: seed.id })"
+                            <Link :href="route('plants.create', { seed: seed.id })"
                                   class="relative inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-br-lg border border-transparent py-4 text-sm font-semibold text-gray-900">
                                 <SparklesIcon class="h-5 w-5 text-gray-400"/>
                                 Germinate

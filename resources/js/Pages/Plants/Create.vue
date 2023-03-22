@@ -22,17 +22,17 @@ const form = useForm({
 </script>
 
 <template>
-    <Head title="Start new germination"/>
+    <Head title="Start new plant"/>
 
     <AuthenticatedLayout>
         <template #header>
-            Start new germination of
+            Start new plant of
         </template>
 
         <section>
             <header>
                 <h2 class="text-lg font-medium text-gray-900">
-                    Record germination of {{ seed.variety }} {{ seed.name }}
+                    Record plant of {{ seed.variety }} {{ seed.name }}
                 </h2>
 
                 <p class="mt-1 text-sm text-gray-600">
@@ -40,7 +40,7 @@ const form = useForm({
                 </p>
             </header>
 
-            <form @submit.prevent="form.post(route('germinations.store'))" class="mt-6 space-y-6">
+            <form @submit.prevent="form.post(route('plants.store'))" class="mt-6 space-y-6">
                 <input type="hidden" name="seed_id" :value="seed.id"/>
                 <InputError class="mt-2" :message="form.errors.seed_id"/>
 

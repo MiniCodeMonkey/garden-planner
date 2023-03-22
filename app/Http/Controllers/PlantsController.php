@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Germination;
+use App\Models\Plant;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -11,13 +11,13 @@ use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
-class GerminationsController extends Controller
+class PlantsController extends Controller
 {
     public function index(Request $request): Response
     {
-        $germinations = $request->user()->germinations;
-        return Inertia::render('Germinations/Index', [
-            'germinations' => $germinations
+        $plants = $request->user()->plants;
+        return Inertia::render('Plants/Index', [
+            'plants' => $plants
         ]);
     }
 
@@ -29,7 +29,7 @@ class GerminationsController extends Controller
 
         abort_unless($seed, 404);
 
-        return Inertia::render('Germinations/Create', [
+        return Inertia::render('Plants/Create', [
             'seed' => $seed
         ]);
     }
@@ -49,37 +49,37 @@ class GerminationsController extends Controller
             ->where('id', $request->input('seed_id'))
             ->first();
 
-        $germination = new Germination();
-        $germination->created_at = $request->input('date');
-        $germination->quantity = $request->input('quantity');
-        $germination->location = $request->input('location');
-        $germination->notes = $request->input('notes');
+        $plant = new Plant();
+        $plant->created_at = $request->input('date');
+        $plant->quantity = $request->input('quantity');
+        $plant->location = $request->input('location');
+        $plant->notes = $request->input('notes');
 
-        $seed->germinations()->save($germination);
+        $seed->plants()->save($plant);
 
-        return Redirect::route('germinations.show', $germination);
+        return Redirect::route('plants.show', $plant);
     }
 
-    public function show(Request $request, Germination $germination): Response
+    public function show(Request $request, Plant $plant): Response
     {
-        abort_unless($germination->seed->user->id === $request->user()->id, 403);
+        abort_unless($plant->seed->user->id === $request->user()->id, 403);
 
-        return Inertia::render('Germinations/Show', [
-            'germination' => $germination
+        return Inertia::render('Plants/Show', [
+            'plant' => $plant
         ]);
     }
 
-    public function edit(Request $request, Germination $germination): Response
+    public function edit(Request $request, Plant $plant): Response
     {
         // TODO
     }
 
-    public function update(Request $request, Germination $germination): Response
+    public function update(Request $request, Plant $plant): Response
     {
         // TODO
     }
 
-    public function destroy(Request $request, Germination $germination): Response
+    public function destroy(Request $request, Plant $plant): Response
     {
         // TODO
     }

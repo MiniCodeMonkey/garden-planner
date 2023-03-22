@@ -33,9 +33,9 @@ class Seed extends Model
         return $this->hasMany(SeedInventory::class);
     }
 
-    public function germinations()
+    public function plants()
     {
-        return $this->hasMany(Germination::class);
+        return $this->hasMany(Plant::class);
     }
 
     public function user()

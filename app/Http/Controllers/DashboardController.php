@@ -14,7 +14,7 @@ class DashboardController extends Controller
         $seedsToSeed = $user->seeds()
             ->where('seeding_start', '<=', now())
             ->where('seeding_end', '>=', now())
-            ->doesntHave('germinations')
+            ->doesntHave('plants')
             ->get();
 
         $seedsToPlant = $user->seeds()

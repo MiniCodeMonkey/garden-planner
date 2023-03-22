@@ -117,7 +117,7 @@ class SeedsController extends Controller
 
         return Inertia::render('Seeds/Show', [
             'seed' => $seed,
-            'germinations' => $seed->germinations,
+            'plants' => $seed->plants,
         ]);
     }
 

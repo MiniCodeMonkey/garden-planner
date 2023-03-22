@@ -3,7 +3,7 @@
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GardensController;
-use App\Http\Controllers\GerminationsController;
+use App\Http\Controllers\PlantsController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SeedsController;
 use Illuminate\Http\Request;
@@ -45,7 +45,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::resource('seeds', SeedsController::class);
     Route::resource('gardens', GardensController::class)->except(['create', 'edit']);
-    Route::resource('germinations', GerminationsController::class);
+    Route::resource('plants', PlantsController::class);
 
     Route::get('calendar', [CalendarController::class, 'index'])->name('calendar.index');
 });
