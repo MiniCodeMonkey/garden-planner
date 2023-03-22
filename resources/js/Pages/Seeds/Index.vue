@@ -180,7 +180,7 @@ const open = ref(false)
             </TransitionRoot>
 
             <div>
-                <section aria-labelledby="filter-heading" class="py-6">
+                <section aria-labelledby="filter-heading" class="pb-6">
                     <h2 id="filter-heading" class="sr-only">Seed filters</h2>
 
                     <div class="flex items-center justify-between">
