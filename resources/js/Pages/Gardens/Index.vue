@@ -145,7 +145,7 @@ onMounted(() => {
         });
 
         map.value.addLayer({
-            id: 'garden-polygons',
+            id: 'garden-lines',
             type: 'line',
             source: 'gardensCollection',
             layout: {
@@ -155,6 +155,16 @@ onMounted(() => {
             paint: {
                 'line-color': '#000',
                 'line-width': 2.5
+            },
+            filter: ['in', '$type', 'Polygon']
+        });
+
+        map.value.addLayer({
+            id: 'garden-fill',
+            type: 'fill',
+            source: 'gardensCollection',
+            paint: {
+                'fill-color': 'rgba(255, 255, 255, 0.5)'
             },
             filter: ['in', '$type', 'Polygon']
         });
@@ -248,6 +258,11 @@ onMounted(() => {
                 }
 
                 map.value.getSource('geojson').setData(geojson);
+            } else {
+                var selectedFeatures = map.value.queryRenderedFeatures(e.point, {
+                    layers: ['garden-fill']
+                });
+                console.log(selectedFeatures);
             }
         });
     });
@@ -273,7 +288,14 @@ onMounted(() => {
                 }
             }
         } else {
-            map.value.getCanvas().style.cursor = '';
+            var features = map.value.queryRenderedFeatures(e.point, {
+                layers: ['garden-fill']
+            });
+
+            // UI indicator for clicking/hovering a point on the map
+            map.value.getCanvas().style.cursor = features.length
+                ? 'context-menu'
+                : 'pointer';
         }
     });
 });
