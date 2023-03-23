@@ -6,6 +6,7 @@ import {XMarkIcon} from '@heroicons/vue/24/outline'
 const props = defineProps({
     garden: Object,
     plants: Array,
+    selectedPlant: Object,
 });
 </script>
 
@@ -40,10 +41,11 @@ const props = defineProps({
                                         </div>
                                     </div>
                                     <div class="relative mt-6 flex-1 px-4 sm:px-6">
-                                        <ul role="list"
-                                            class="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                                            <li v-for="plant in plants" :key="plant.id"
-                                                class="col-span-1 flex flex-col divide-y divide-gray-200 rounded-lg bg-white text-center shadow transition ease-in-out hover:scale-110 hover:rotate-6 duration-300 cursor-pointer">
+                                        <div role="list"
+                                             class="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                                            <button v-for="plant in plants" :key="plant.id"
+                                                    :class="[selectedPlant && selectedPlant.id === plant.id ? 'scale-110 rotate-6' : 'hover:scale-110 hover:rotate-6', 'col-span-1 flex flex-col divide-y divide-gray-200 rounded-lg bg-white text-center shadow transition ease-in-out duration-300']"
+                                                    @click="$emit('plantSelected', selectedPlant && selectedPlant.id === plant.id ? null : plant)">
                                                 <div class="flex flex-1 flex-col p-2">
                                                     <img class="mx-auto flex-shrink-0 rounded-full"
                                                          :src="plant.seed.public_image_url" alt=""/>
@@ -65,8 +67,8 @@ const props = defineProps({
                                                         </dd>
                                                     </dl>
                                                 </div>
-                                            </li>
-                                        </ul>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </DialogPanel>

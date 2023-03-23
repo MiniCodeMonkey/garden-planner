@@ -11,6 +11,7 @@ import {ChevronDownIcon} from '@heroicons/vue/20/solid'
 import GardenDetails from './Partials/GardenDetails.vue';
 
 const selectedGarden = ref(null)
+const selectedPlant = ref(null)
 
 const props = defineProps({
     gardens: Array,
@@ -324,7 +325,9 @@ onUnmounted(() => {
             Garden
         </template>
 
-        <GardenDetails :garden="selectedGarden" :plants="plants" v-on:close="selectedGarden = null"/>
+        <GardenDetails :garden="selectedGarden" :plants="plants" :selectedPlant="selectedPlant"
+                       v-on:close="selectedGarden = null"
+                       v-on:plantSelected="(plant) => selectedPlant = plant"/>
 
         <div class="flex mb-8">
             <div>{{ statusText }}</div>
