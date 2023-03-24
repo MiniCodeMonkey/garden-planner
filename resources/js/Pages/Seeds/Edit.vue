@@ -214,7 +214,7 @@ const form = useForm({
                             id="seeding_end"
                             type="date"
                             class="mt-1 block w-full"
-                            v-model="form.seeding_start"
+                            v-model="form.seeding_end"
                         />
                     </div>
 
@@ -237,7 +237,7 @@ const form = useForm({
                             id="planting_end"
                             type="date"
                             class="mt-1 block w-full"
-                            v-model="form.planting_start"
+                            v-model="form.planting_end"
                         />
                     </div>
 
