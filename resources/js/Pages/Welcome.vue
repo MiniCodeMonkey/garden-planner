@@ -43,7 +43,7 @@ defineProps({
 
         <div class="max-w-7xl mx-auto p-6 lg:p-8">
             <ApplicationLogo/>
-            <p class="text-white">The <em>neat</em> little garden planning tool</p>
+            <p class="text-white">The <em>neat</em> little vegetable garden planning tool</p>
         </div>
     </div>
 </template>
