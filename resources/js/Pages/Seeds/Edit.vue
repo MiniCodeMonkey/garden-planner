@@ -260,7 +260,7 @@ const form = useForm({
                             id="harvest_end"
                             type="date"
                             class="mt-1 block w-full"
-                            v-model="form.harvest_start"
+                            v-model="form.harvest_end"
                         />
                     </div>
 
