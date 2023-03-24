@@ -9,6 +9,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import {Menu, MenuButton, MenuItem, MenuItems} from '@headlessui/vue'
 import {ChevronDownIcon} from '@heroicons/vue/20/solid'
 import GardenDetails from './Partials/GardenDetails.vue';
+import mapLayers from './mapLayers.js'
 
 const selectedGarden = ref(null)
 const selectedPlant = ref(null)
@@ -30,7 +31,7 @@ const DefaultStatusText = {
     'Circle': 'Not implemented yet',
 }
 
-var geojson = {
+var currentDrawingCollection = {
     'type': 'FeatureCollection',
     'features': []
 };
@@ -50,12 +51,12 @@ function startEditGarden(shape) {
     editGarden.value = true;
     gardenShape.value = shape;
     statusText.value = DefaultStatusText[shape];
-    geojson.features = [];
-    map.value.getSource('geojson').setData(geojson);
+    currentDrawingCollection.features = [];
+    map.value.getSource('geojson').setData(currentDrawingCollection);
 }
 
 function createGarden(feature) {
-    geojson.features = [];
+    currentDrawingCollection.features = [];
 
     editGarden.value = false;
     statusText.value = '';
@@ -70,17 +71,21 @@ function createGarden(feature) {
         .catch(err => console.error(err));
 }
 
-onMounted(() => {
+function getInitialState() {
     let center = null;
     if (props.gardens && props.gardens.length > 0) {
         center = turf.center(props.gardens[0].geojson)
     }
 
-    const initialState = {
+    return {
         lng: center?.geometry.coordinates[0] || -34,
         lat: center?.geometry.coordinates[1] || 42,
         zoom: center ? 18 : 2
     };
+}
+
+onMounted(() => {
+    const initialState = getInitialState();
 
     map.value = markRaw(new Map({
         container: mapContainer.value,
@@ -102,7 +107,7 @@ onMounted(() => {
     map.value.on('load', function () {
         map.value.addSource('geojson', {
             'type': 'geojson',
-            'data': geojson
+            'data': currentDrawingCollection
         });
 
         map.value.addSource('gardensCollection', {
@@ -110,82 +115,11 @@ onMounted(() => {
             'data': gardensCollection
         });
 
-        // Styles
-        map.value.addLayer({
-            id: 'measure-points',
-            type: 'circle',
-            source: 'geojson',
-            paint: {
-                'circle-radius': 5,
-                'circle-color': '#000'
-            },
-            filter: ['in', '$type', 'Point']
-        });
-        map.value.addLayer({
-            id: 'measure-lines',
-            type: 'line',
-            source: 'geojson',
-            layout: {
-                'line-cap': 'round',
-                'line-join': 'round'
-            },
-            paint: {
-                'line-color': '#000',
-                'line-width': 2.5
-            },
-            filter: ['in', '$type', 'LineString']
-        });
-
-        map.value.addLayer({
-            'id': 'measure-lines-labels',
-            'type': 'symbol',
-            'source': 'geojson',
-            'layout': {
-                'text-field': ['get', 'distance'],
-                'text-font': ['Open Sans Regular'],
-                'text-size': 8,
-                'symbol-placement': 'line-center',
-            },
-            filter: ['in', '$type', 'LineString']
-        });
-
-        map.value.addLayer({
-            id: 'garden-lines',
-            type: 'line',
-            source: 'gardensCollection',
-            layout: {
-                'line-cap': 'round',
-                'line-join': 'round'
-            },
-            paint: {
-                'line-color': '#000',
-                'line-width': 2.5
-            },
-            filter: ['in', '$type', 'Polygon']
-        });
-
-        map.value.addLayer({
-            id: 'garden-fill',
-            type: 'fill',
-            source: 'gardensCollection',
-            paint: {
-                'fill-color': 'rgba(255, 255, 255, 0.5)'
-            },
-            filter: ['in', '$type', 'Polygon']
-        });
-
-        map.value.addLayer({
-            'id': 'garden-labels',
-            'type': 'symbol',
-            'source': 'gardensCollection',
-            'layout': {
-                'text-field': ['get', 'area'],
-                'text-font': ['Open Sans Regular'],
-                'text-size': 8
-            }
-        });
-
         map.value.getSource('gardensCollection').setData(gardensCollection);
+
+        for (const layer in mapLayers) {
+            map.value.addLayer(mapLayers[layer]);
+        }
 
         map.value.on('click', function (e) {
             if (editGarden.value) {
@@ -195,8 +129,8 @@ onMounted(() => {
 
                 if (gardenShape.value === 'Rectangle') {
                     if (selectedFeatures.length <= 0) {
-                        if (geojson.features.length > 0) {
-                            var line = turf.lineString([geojson.features[0].geometry.coordinates, [e.lngLat.lng, e.lngLat.lat]]);
+                        if (currentDrawingCollection.features.length > 0) {
+                            var line = turf.lineString([currentDrawingCollection.features[0].geometry.coordinates, [e.lngLat.lng, e.lngLat.lat]]);
                             var bbox = turf.bbox(line);
                             var bboxPolygon = turf.bboxPolygon(bbox);
 
@@ -213,19 +147,19 @@ onMounted(() => {
                                 }
                             };
 
-                            geojson.features.push(point);
+                            currentDrawingCollection.features.push(point);
                         }
                     }
                 } else if (gardenShape.value === 'Polygon') {
-                    if (geojson.features.length > 1) {
-                        geojson.features.pop();
+                    if (currentDrawingCollection.features.length > 1) {
+                        currentDrawingCollection.features.pop();
                     }
 
                     if (selectedFeatures.length) {
                         // If the first feature was clicked
                         var id = selectedFeatures[0].properties.id;
-                        if (id === geojson.features[0].properties.id) {
-                            var points = geojson.features
+                        if (id === currentDrawingCollection.features[0].properties.id) {
+                            var points = currentDrawingCollection.features
                                 .filter(feature => feature.geometry.type === 'Point')
                                 .map(feature => feature.geometry.coordinates);
 
@@ -246,23 +180,23 @@ onMounted(() => {
                                 'id': String(new Date().getTime())
                             }
                         };
-                        geojson.features.push(point);
+                        currentDrawingCollection.features.push(point);
                     }
 
-                    if (geojson.features.length > 1) {
+                    if (currentDrawingCollection.features.length > 1) {
                         // Create line through points
-                        linestring.geometry.coordinates = geojson.features.map(
+                        linestring.geometry.coordinates = currentDrawingCollection.features.map(
                             function (point) {
                                 return point.geometry.coordinates;
                             }
                         );
-                        geojson.features.push(linestring);
+                        currentDrawingCollection.features.push(linestring);
                     }
                 } else if (gardenShape.value === 'Circle') {
                     alert('Not implemented yet');
                 }
 
-                map.value.getSource('geojson').setData(geojson);
+                map.value.getSource('geojson').setData(currentDrawingCollection);
             } else {
                 var selectedFeatures = map.value.queryRenderedFeatures(e.point, {
                     layers: ['garden-fill']
@@ -285,14 +219,13 @@ onMounted(() => {
                 layers: ['measure-points']
             });
 
-            // UI indicator for clicking/hovering a point on the map
             map.value.getCanvas().style.cursor = features.length
                 ? 'pointer'
                 : 'crosshair';
 
             if (gardenShape.value === 'Rectangle') {
-                if (geojson.features.length > 0) {
-                    const line = turf.lineString([geojson.features[0].geometry.coordinates, [e.lngLat.lng, e.lngLat.lat]]);
+                if (currentDrawingCollection.features.length > 0) {
+                    const line = turf.lineString([currentDrawingCollection.features[0].geometry.coordinates, [e.lngLat.lng, e.lngLat.lat]]);
                     var bbox = turf.bbox(line);
                     const width = Math.round(turf.distance([bbox[0], bbox[1]], [bbox[2], bbox[3]], {units: "centimeters"}));
                     const height = Math.round(turf.distance([bbox[0], bbox[1]], [bbox[0], bbox[3]], {units: "centimeters"}));
@@ -303,8 +236,7 @@ onMounted(() => {
             var features = map.value.queryRenderedFeatures(e.point, {
                 layers: ['garden-fill']
             });
-
-            // UI indicator for clicking/hovering a point on the map
+            
             map.value.getCanvas().style.cursor = features.length
                 ? 'context-menu'
                 : 'pointer';
