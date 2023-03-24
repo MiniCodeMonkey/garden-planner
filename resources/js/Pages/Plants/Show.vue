@@ -74,7 +74,7 @@ defineProps({
                     <div class="sm:col-span-1">
                         <dt class="text-sm font-medium text-gray-500">Days</dt>
                         <dd class="mt-1 text-sm text-gray-900">{{
-                                dayjs(plant.created_at).diff(dayjs(), 'day')
+                                dayjs().diff(dayjs(plant.created_at), 'day')
                             }} out of {{
                                 plant.seed.sprouting_time_days_max.length > 0 ? plant.seed.sprouting_time_days_min + ' ' + plant.seed.sprouting_time_days_max : plant.seed.sprouting_time_days_min
                             }}
