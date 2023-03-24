@@ -2,13 +2,12 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use Carbon\Carbon;
-use DOMDocument;
-use Illuminate\Database\Seeder;
 use App\Models\Seed;
 use App\Models\SeedInventory;
-use Illuminate\Support\Facades\Storage;
+use App\Models\User;
+use App\WebsiteMetadataImageDownloader;
+use Carbon\Carbon;
+use Illuminate\Database\Seeder;
 
 class SeedSeeder extends Seeder
 {
@@ -23,8 +22,8 @@ class SeedSeeder extends Seeder
     {
         $user = User::findOrFail(1);
 
-        $rows = collect(file(__DIR__  . '/inventory.csv'))
-            ->map(fn ($row) => str_getcsv($row));
+        $rows = collect(file(__DIR__ . '/inventory.csv'))
+            ->map(fn($row) => str_getcsv($row));
 
         $headers = $rows->shift();
 
@@ -37,7 +36,7 @@ class SeedSeeder extends Seeder
                 $seed->variety = $row['Variety'] === '?' ? null : $row['Variety'];
                 $seed->category = $row['Category'];
                 $seed->link = $row['Link'];
-                $seed->image_filename = $this->downloadImage($row['Link']);
+                $seed->image_filename = (new WebsiteMetadataImageDownloader())->downloadForUrl($row['Link']);
                 $seed->green_house = $row['Green house?'] === 'Yes';
 
                 [$sproutingTimeDaysMin, $sproutingTimeDaysMax] = explode('-', $row['Sprouting time (days)'] . '-');
@@ -69,46 +68,5 @@ class SeedSeeder extends Seeder
 
                 $seed->inventory()->save($inventory);
             });
-    }
-
-    private function downloadImage(string $url)
-    {
-        $disk = Storage::disk();
-
-        $options = [
-            'http' => [
-                'user_agent' => 'Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36'
-            ]
-        ];
-        $context = stream_context_create($options);
-
-        $url = filter_var($url, FILTER_VALIDATE_URL);
-        if (!$url) {
-            return null;
-        }
-
-        $contents = file_get_contents($url, false, $context);
-
-        libxml_use_internal_errors(true);
-        $dom = new DOMDocument();
-        $dom->loadHTML($contents);
-
-        foreach ($dom->getElementsByTagName('meta') as $meta) {
-            if ($meta->getAttribute('property') === 'og:image') {
-                $imageUrl = $meta->getAttribute('content');
-                $ext = strtolower(pathinfo($imageUrl, PATHINFO_EXTENSION));
-                $ext = explode('?', $ext)[0];
-
-                $filename = 'seeds/' . md5($url) . '.' . $ext;
-
-                if (!$disk->exists($filename)) {
-                    $disk->put($filename, file_get_contents($imageUrl, false, $context), 'public');
-                }
-
-                return $filename;
-            }
-        }
-
-        return null;
     }
 }

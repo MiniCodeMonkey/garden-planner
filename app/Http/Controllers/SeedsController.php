@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Seed;
 use App\Models\User;
+use App\WebsiteMetadataImageDownloader;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
@@ -136,13 +137,15 @@ class SeedsController extends Controller
 
         $request->validate([
             'name' => 'required',
-            'category' => 'required'
+            'category' => 'required',
+            'link' => 'url'
         ]);
 
         $seed->name = $request->input('name');
         $seed->variety = $request->input('variety');
         $seed->category = $request->input('category');
         $seed->link = $request->input('link');
+        $seed->image_filename = (new WebsiteMetadataImageDownloader())->downloadForUrl($seed->link);
         $seed->green_house = $request->input('green_house');
         $seed->sprouting_time_days_min = $request->input('sprouting_time_days_min');
         $seed->sprouting_time_days_max = $request->input('sprouting_time_days_max');
