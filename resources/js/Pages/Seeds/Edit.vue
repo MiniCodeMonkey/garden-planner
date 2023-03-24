@@ -164,26 +164,26 @@ const form = useForm({
                 </div>
 
                 <div>
-                    <InputLabel for="seeding_distance_min" value="Seeding distance (cm)"/>
+                    <InputLabel for="seed_distance_min" value="Seeding distance (cm)"/>
 
                     <div class="flex items-center">
                         <TextInput
-                            id="seeding_distance_min"
+                            id="seed_distance_min"
                             type="text"
                             class="mt-1 block w-full"
-                            v-model="form.seeding_distance_min"
+                            v-model="form.seed_distance_min"
                         />
                         <div class="mx-2">-</div>
                         <TextInput
-                            id="seeding_distance_max"
+                            id="seed_distance_max"
                             type="text"
                             class="mt-1 block w-full"
-                            v-model="form.seeding_distance_max"
+                            v-model="form.seed_distance_max"
                         />
                     </div>
 
-                    <InputError class="mt-2" :message="form.errors.seeding_distance_min"/>
-                    <InputError class="mt-2" :message="form.errors.seeding_distance_max"/>
+                    <InputError class="mt-2" :message="form.errors.seed_distance_min"/>
+                    <InputError class="mt-2" :message="form.errors.seed_distance_max"/>
                 </div>
 
                 <div>
