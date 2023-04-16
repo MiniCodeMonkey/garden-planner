@@ -2,7 +2,7 @@ export default [
     {
         id: 'measure-points',
         type: 'circle',
-        source: 'geojson',
+        source: 'RectangleDrawHandler',
         paint: {
             'circle-radius': 5,
             'circle-color': '#000'
@@ -12,7 +12,7 @@ export default [
     {
         id: 'measure-lines',
         type: 'line',
-        source: 'geojson',
+        source: 'RectangleDrawHandler',
         layout: {
             'line-cap': 'round',
             'line-join': 'round'
@@ -26,7 +26,7 @@ export default [
     {
         id: 'measure-lines-labels',
         type: 'symbol',
-        source: 'geojson',
+        source: 'RectangleDrawHandler',
         layout: {
             'text-field': ['get', 'distance'],
             'text-font': ['Open Sans Regular'],
@@ -38,7 +38,7 @@ export default [
     {
         id: 'garden-lines',
         type: 'line',
-        source: 'gardensCollection',
+        source: 'gardens.geojson',
         layout: {
             'line-cap': 'round',
             'line-join': 'round'
@@ -52,7 +52,7 @@ export default [
     {
         id: 'garden-fill',
         type: 'fill',
-        source: 'gardensCollection',
+        source: 'gardens.geojson',
         paint: {
             'fill-color': 'rgba(255, 255, 255, 0.5)'
         },
@@ -61,7 +61,7 @@ export default [
     {
         id: 'garden-labels',
         type: 'symbol',
-        source: 'gardensCollection',
+        source: 'gardens.geojson',
         layout: {
             'text-field': ['get', 'area'],
             'text-font': ['Open Sans Regular'],

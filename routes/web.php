@@ -45,6 +45,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::resource('seeds', SeedsController::class);
     Route::resource('gardens', GardensController::class)->except(['create', 'edit']);
+    Route::get('gardens.geojson', [GardensController::class, 'geojson']);
     Route::resource('plants', PlantsController::class);
 
     Route::get('calendar', [CalendarController::class, 'index'])->name('calendar.index');

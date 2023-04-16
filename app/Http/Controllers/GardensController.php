@@ -18,6 +18,16 @@ class GardensController extends Controller
         ]);
     }
 
+    public function geojson(Request $request): JsonResponse
+    {
+        return response()->json([
+            'type' => 'FeatureCollection',
+            'features' => $request->user()->gardens->map(function ($garden) {
+                return $garden->geojson;
+            })
+        ]);
+    }
+
     public function store(Request $request): JsonResponse
     {
         $request->validate([

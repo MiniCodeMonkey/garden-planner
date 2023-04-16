@@ -10,65 +10,31 @@ import {Menu, MenuButton, MenuItem, MenuItems} from '@headlessui/vue'
 import {ChevronDownIcon} from '@heroicons/vue/20/solid'
 import GardenDetails from './Partials/GardenDetails.vue';
 import mapLayers from './mapLayers.js'
-
-const selectedGarden = ref(null)
-const selectedPlant = ref(null)
+import RectangleDrawHandler from './RectangleDrawHandler';
+import PolygonDrawHandler from './PolygonDrawHandler';
+import CircleDrawHandler from './CircleDrawHandler';
 
 const props = defineProps({
     gardens: Array,
     plants: Array,
 });
 
-const GardenShapes = [
-    'Rectangle',
-    'Polygon',
-    'Circle',
-]
-
-const DefaultStatusText = {
-    'Rectangle': 'Click where the first corner of your garden starts',
-    'Polygon': 'Finish by clicking on the first point again',
-    'Circle': 'Not implemented yet',
-}
-
-var currentDrawingCollection = {
-    'type': 'FeatureCollection',
-    'features': []
-};
-
-var gardensCollection = {
-    'type': 'FeatureCollection',
-    'features': props.gardens.map(garden => garden.geojson)
-};
-
 const mapContainer = shallowRef(null);
 const map = shallowRef(null);
+
+const selectedGarden = ref(null)
+const selectedPlant = ref(null)
+
 const editGarden = ref(false);
 const gardenShape = ref('Rectangle');
 const statusText = ref();
 
+let drawHandlers;
+
 function startEditGarden(shape) {
     editGarden.value = true;
     gardenShape.value = shape;
-    statusText.value = DefaultStatusText[shape];
-    currentDrawingCollection.features = [];
-    map.value.getSource('geojson').setData(currentDrawingCollection);
-}
-
-function createGarden(feature) {
-    currentDrawingCollection.features = [];
-
-    editGarden.value = false;
-    statusText.value = '';
-
-    const name = prompt('What should we call this lovely garden?');
-
-    axios.post('gardens', {name, geojson: feature, area: turf.area(feature, {units: "centimeters"})})
-        .then(response => {
-            gardensCollection.features.push(response.data.geojson);
-            map.value.getSource('gardensCollection').setData(gardensCollection);
-        })
-        .catch(err => console.error(err));
+    statusText.value = drawHandlers[shape].getDefaultStatusText();
 }
 
 function getInitialState() {
@@ -95,27 +61,17 @@ onMounted(() => {
     }));
     map.value.addControl(new NavigationControl(), 'top-right');
 
-    var linestring = {
-        'type': 'Feature',
-        'properties': {},
-        'geometry': {
-            'type': 'LineString',
-            'coordinates': []
-        }
-    };
-
     map.value.on('load', function () {
-        map.value.addSource('geojson', {
+        map.value.addSource('gardens.geojson', {
             'type': 'geojson',
-            'data': currentDrawingCollection
+            'data': '/gardens.geojson'
         });
 
-        map.value.addSource('gardensCollection', {
-            'type': 'geojson',
-            'data': gardensCollection
-        });
-
-        map.value.getSource('gardensCollection').setData(gardensCollection);
+        drawHandlers = {
+            Rectangle: new RectangleDrawHandler(map, statusText),
+            Polygon: new PolygonDrawHandler(map, statusText),
+            Circle: new CircleDrawHandler(map, statusText),
+        }
 
         for (const layer in mapLayers) {
             map.value.addLayer(mapLayers[layer]);
@@ -123,80 +79,7 @@ onMounted(() => {
 
         map.value.on('click', function (e) {
             if (editGarden.value) {
-                var selectedFeatures = map.value.queryRenderedFeatures(e.point, {
-                    layers: ['measure-points']
-                });
-
-                if (gardenShape.value === 'Rectangle') {
-                    if (selectedFeatures.length <= 0) {
-                        if (currentDrawingCollection.features.length > 0) {
-                            var line = turf.lineString([currentDrawingCollection.features[0].geometry.coordinates, [e.lngLat.lng, e.lngLat.lat]]);
-                            var bbox = turf.bbox(line);
-                            var bboxPolygon = turf.bboxPolygon(bbox);
-
-                            createGarden(bboxPolygon);
-                        } else {
-                            var point = {
-                                'type': 'Feature',
-                                'geometry': {
-                                    'type': 'Point',
-                                    'coordinates': [e.lngLat.lng, e.lngLat.lat]
-                                },
-                                'properties': {
-                                    'id': String(new Date().getTime())
-                                }
-                            };
-
-                            currentDrawingCollection.features.push(point);
-                        }
-                    }
-                } else if (gardenShape.value === 'Polygon') {
-                    if (currentDrawingCollection.features.length > 1) {
-                        currentDrawingCollection.features.pop();
-                    }
-
-                    if (selectedFeatures.length) {
-                        // If the first feature was clicked
-                        var id = selectedFeatures[0].properties.id;
-                        if (id === currentDrawingCollection.features[0].properties.id) {
-                            var points = currentDrawingCollection.features
-                                .filter(feature => feature.geometry.type === 'Point')
-                                .map(feature => feature.geometry.coordinates);
-
-                            points.push(points[0]);
-
-                            var line = turf.lineString(points);
-                            var polygon = turf.lineToPolygon(line);
-                            createGarden(polygon);
-                        }
-                    } else {
-                        var point = {
-                            'type': 'Feature',
-                            'geometry': {
-                                'type': 'Point',
-                                'coordinates': [e.lngLat.lng, e.lngLat.lat]
-                            },
-                            'properties': {
-                                'id': String(new Date().getTime())
-                            }
-                        };
-                        currentDrawingCollection.features.push(point);
-                    }
-
-                    if (currentDrawingCollection.features.length > 1) {
-                        // Create line through points
-                        linestring.geometry.coordinates = currentDrawingCollection.features.map(
-                            function (point) {
-                                return point.geometry.coordinates;
-                            }
-                        );
-                        currentDrawingCollection.features.push(linestring);
-                    }
-                } else if (gardenShape.value === 'Circle') {
-                    alert('Not implemented yet');
-                }
-
-                map.value.getSource('geojson').setData(currentDrawingCollection);
+                drawHandlers[gardenShape.value].onClick(e);
             } else {
                 var selectedFeatures = map.value.queryRenderedFeatures(e.point, {
                     layers: ['garden-fill']
@@ -211,36 +94,28 @@ onMounted(() => {
                 }
             }
         });
-    });
+        
+        map.value.on('mousemove', function (e) {
+            if (editGarden.value) {
+                var features = map.value.queryRenderedFeatures(e.point, {
+                    layers: ['measure-points']
+                });
 
-    map.value.on('mousemove', function (e) {
-        if (editGarden.value) {
-            var features = map.value.queryRenderedFeatures(e.point, {
-                layers: ['measure-points']
-            });
+                map.value.getCanvas().style.cursor = features.length
+                    ? 'pointer'
+                    : 'crosshair';
 
-            map.value.getCanvas().style.cursor = features.length
-                ? 'pointer'
-                : 'crosshair';
+                drawHandlers[gardenShape.value].onMouseMove(e);
+            } else {
+                var features = map.value.queryRenderedFeatures(e.point, {
+                    layers: ['garden-fill']
+                });
 
-            if (gardenShape.value === 'Rectangle') {
-                if (currentDrawingCollection.features.length > 0) {
-                    const line = turf.lineString([currentDrawingCollection.features[0].geometry.coordinates, [e.lngLat.lng, e.lngLat.lat]]);
-                    var bbox = turf.bbox(line);
-                    const width = Math.round(turf.distance([bbox[0], bbox[1]], [bbox[2], bbox[3]], {units: "centimeters"}));
-                    const height = Math.round(turf.distance([bbox[0], bbox[1]], [bbox[0], bbox[3]], {units: "centimeters"}));
-                    statusText.value = `${width}cm x ${height}cm`
-                }
+                map.value.getCanvas().style.cursor = features.length
+                    ? 'context-menu'
+                    : 'pointer';
             }
-        } else {
-            var features = map.value.queryRenderedFeatures(e.point, {
-                layers: ['garden-fill']
-            });
-            
-            map.value.getCanvas().style.cursor = features.length
-                ? 'context-menu'
-                : 'pointer';
-        }
+        });
     });
 });
 
@@ -284,7 +159,8 @@ onUnmounted(() => {
                             <MenuItems
                                 class="absolute right-0 z-10 mt-2 -mr-1 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                                 <div class="py-1">
-                                    <MenuItem v-for="shape in GardenShapes" :key="shape" v-slot="{ active }">
+                                    <MenuItem v-for="shape in Object.keys(drawHandlers)" :key="shape"
+                                              v-slot="{ active }">
                                         <button
                                             @click="startEditGarden(shape)"
                                             :class="[active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'w-full text-left block px-4 py-2 text-sm']">
