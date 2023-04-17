@@ -23,6 +23,29 @@ export default [
         filter: ['in', '$type', 'Polygon']
     },
     {
+        id: 'grid-lines',
+        type: 'line',
+        source: 'grid',
+        layout: {
+            'line-cap': 'round',
+            'line-join': 'round'
+        },
+        paint: {
+            'line-color': '#000',
+            'line-width': 2.5
+        },
+        filter: ['in', '$type', 'Polygon']
+    },
+    {
+        id: 'grid-fill',
+        type: 'fill',
+        source: 'grid',
+        paint: {
+            'fill-color': 'rgba(255, 255, 255, 0.5)'
+        },
+        filter: ['in', '$type', 'Polygon']
+    },
+    {
         id: 'garden-labels',
         type: 'symbol',
         source: 'gardens.geojson',

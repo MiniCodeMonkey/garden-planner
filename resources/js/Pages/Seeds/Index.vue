@@ -51,7 +51,6 @@ function handleOptionChange($event, section, val) {
             search({[section]: props.currentFilters[section].filter(item => item !== val)});
         }
     } else if ($event.target.checked) {
-        console.log(section, val);
         search({
             [section]: val
         });

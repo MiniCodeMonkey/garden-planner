@@ -91,6 +91,14 @@ onMounted(() => {
             'data': '/gardens.geojson'
         });
 
+        map.value.addSource('grid', {
+            'type': 'geojson',
+            'data': {
+                'type': 'FeatureCollection',
+                'features': []
+            }
+        });
+
         for (const layer in mapLayers) {
             map.value.addLayer(mapLayers[layer]);
         }
@@ -109,6 +117,12 @@ onMounted(() => {
                     const bbox = turf.bbox(selectedFeatures[0]);
                     const bounds = [[bbox[0], bbox[1]], [bbox[2], bbox[3]]];
                     map.value.fitBounds(bounds);
+
+                    var cellSide = 15;
+                    var options = {units: 'centimeters'};
+                    var hexgrid = turf.squareGrid(bbox, cellSide, options);
+
+                    map.value.getSource('grid').setData(hexgrid);
                 }
             }
         });
