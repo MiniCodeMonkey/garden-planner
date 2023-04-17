@@ -21,6 +21,8 @@ class Garden extends Model
         return Attribute::make(
             get: function ($geojson) {
                 $geojson = json_decode($geojson);
+                $geojson->properties['id'] = $this->id;
+                $geojson->properties['name'] = $this->name;
                 $geojson->properties['area'] = round($this->area) . 'm2';
                 return $geojson;
             }

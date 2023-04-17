@@ -2,47 +2,75 @@ import * as turf from '@turf/turf';
 import DrawHandler from './DrawHandler.js';
 
 export default class RectangleDrawHandler extends DrawHandler {
+    constructor(...args) {
+        super(...args);
+        this.startingPoint = null;
+        this.layers = [
+            {
+                id: 'starting-point',
+                type: 'circle',
+                source: 'RectangleDrawHandler',
+                paint: {
+                    'circle-radius': 5,
+                    'circle-color': '#000'
+                },
+                filter: ['in', '$type', 'Point']
+            },
+            {
+                id: 'rectangle-lines',
+                type: 'line',
+                source: 'RectangleDrawHandler',
+                layout: {
+                    'line-cap': 'round',
+                    'line-join': 'round'
+                },
+                paint: {
+                    'line-color': '#333',
+                    'line-width': 2.5,
+                    'line-dasharray': [2, 2],
+                },
+                filter: ['in', '$type', 'Polygon']
+            }
+        ];
+
+        this.addLayers();
+    }
+
     getDefaultStatusText() {
         return 'Click where the first corner of your garden starts';
     }
 
     onClick(e) {
-        var selectedFeatures = this.map.value.queryRenderedFeatures(e.point, {
-            layers: ['measure-points']
-        });
+        if (this.startingPoint) {
+            const line = turf.lineString([this.startingPoint, [e.lngLat.lng, e.lngLat.lat]]);
+            const bbox = turf.bbox(line);
+            const bboxPolygon = turf.bboxPolygon(bbox);
 
-        if (selectedFeatures.length <= 0) {
-            if (this.currentDrawingCollection.features.length > 0) {
-                var line = turf.lineString([this.currentDrawingCollection.features[0].geometry.coordinates, [e.lngLat.lng, e.lngLat.lat]]);
-                var bbox = turf.bbox(line);
-                var bboxPolygon = turf.bboxPolygon(bbox);
-
-                this.createGarden(bboxPolygon);
-            } else {
-                var point = {
-                    'type': 'Feature',
-                    'geometry': {
-                        'type': 'Point',
-                        'coordinates': [e.lngLat.lng, e.lngLat.lat]
-                    },
-                    'properties': {
-                        'id': String(new Date().getTime())
-                    }
-                };
-
-                this.currentDrawingCollection.features.push(point);
-            }
+            this.createGarden(bboxPolygon);
+        } else {
+            this.startingPoint = [e.lngLat.lng, e.lngLat.lat];
+            this.currentDrawingCollection.features.push(this.createFeature('Point', this.startingPoint));
+            this.refreshCurrentDrawing();
         }
     }
 
     onMouseMove(e) {
-        if (this.currentDrawingCollection.features.length > 0) {
-            const line = turf.lineString([this.currentDrawingCollection.features[0].geometry.coordinates, [e.lngLat.lng, e.lngLat.lat]]);
-            var bbox = turf.bbox(line);
+        this.map.value.getCanvas().style.cursor = 'crosshair';
+
+        if (this.startingPoint) {
+            const line = turf.lineString([this.startingPoint, [e.lngLat.lng, e.lngLat.lat]]);
+            const bbox = turf.bbox(line);
+            const bboxPolygon = turf.bboxPolygon(bbox);
+
             const width = Math.round(turf.distance([bbox[0], bbox[1]], [bbox[2], bbox[3]], {units: "centimeters"}));
             const height = Math.round(turf.distance([bbox[0], bbox[1]], [bbox[0], bbox[3]], {units: "centimeters"}));
+            const area = Math.round(turf.area(bboxPolygon));
 
-            this.statusText.value = `${width}cm x ${height}cm`
+            this.statusText.value = `${width}cm x ${height}cm - ${area}m2`
+
+            this.currentDrawingCollection.features = [bboxPolygon];
+            this.refreshCurrentDrawing();
         }
     }
+
 }

@@ -6,6 +6,8 @@ export default class DrawHandler {
             throw new TypeError("Cannot construct DrawHandler directly");
         }
 
+        this.name = new.target.name;
+
         this.map = map;
         this.statusText = statusText;
 
@@ -14,14 +16,19 @@ export default class DrawHandler {
             'features': []
         };
 
-        this.map.value.addSource(new.target.name, {
+        this.map.value.addSource(this.name, {
             'type': 'geojson',
             'data': this.currentDrawingCollection
         });
     }
 
+    destruct() {
+        this.removeLayers();
+        this.map.value.removeSource(this.name);
+    }
+
     refreshCurrentDrawing() {
-        this.map.value.getSource('geojson').setData(this.currentDrawingCollection);
+        this.map.value.getSource(this.name).setData(this.currentDrawingCollection);
     }
 
     onMouseMove(e) {
@@ -29,7 +36,7 @@ export default class DrawHandler {
     }
 
     onClick(e) {
-        
+
     }
 
     createGarden(feature) {
@@ -41,17 +48,36 @@ export default class DrawHandler {
         const name = prompt('What should we call this lovely garden?');
 
         if (name) {
-            axios.post('gardens', {name, geojson: feature, area: turf.area(feature, {units: "centimeters"})})
-                .then(response => {
-                    console.log(this.map.value.getSource('gardensCollection'));
-                    /*
-                    const gardensCollection = this.map.value.getSource('gardensCollection').getData();
-                    gardensCollection.features.push(response.data.geojson);
+            this.destruct();
 
-                    this.map.value.getSource('gardensCollection').setData(gardensCollection);
-                    */
+            axios.post('gardens', {name, geojson: feature, area: turf.area(feature)})
+                .then(response => {
+                    this.map.value.getSource('gardens.geojson').setData(response.data);
                 })
                 .catch(err => console.error(err));
         }
+    }
+
+    addLayers() {
+        for (const layer in this.layers) {
+            this.map.value.addLayer(this.layers[layer]);
+        }
+    }
+
+    removeLayers() {
+        for (const layer in this.layers) {
+            this.map.value.removeLayer(this.layers[layer].id);
+        }
+    }
+
+    createFeature(type, coordinates) {
+        return {
+            'type': 'Feature',
+            'properties': {},
+            'geometry': {
+                'type': type,
+                'coordinates': coordinates
+            }
+        };
     }
 }

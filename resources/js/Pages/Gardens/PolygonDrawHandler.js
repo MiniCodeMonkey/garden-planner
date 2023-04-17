@@ -4,15 +4,60 @@ import DrawHandler from './DrawHandler.js';
 export default class PolygonDrawHandler extends DrawHandler {
     constructor(...args) {
         super(...args);
+        this.layers = [
+            {
+                id: 'measure-points',
+                type: 'circle',
+                source: 'PolygonDrawHandler',
+                paint: {
+                    'circle-radius': 5,
+                    'circle-color': '#000'
+                },
+                filter: ['in', '$type', 'Point']
+            },
+            {
+                id: 'measure-lines',
+                type: 'line',
+                source: 'PolygonDrawHandler',
+                layout: {
+                    'line-cap': 'round',
+                    'line-join': 'round'
+                },
+                paint: {
+                    'line-color': '#000',
+                    'line-width': 2.5
+                },
+                filter: ['in', '$type', 'LineString']
+            },
+            {
+                id: 'polygon',
+                type: 'line',
+                source: 'PolygonDrawHandler',
+                layout: {
+                    'line-cap': 'round',
+                    'line-join': 'round'
+                },
+                paint: {
+                    'line-color': '#000',
+                    'line-width': 2.5
+                },
+                filter: ['in', '$type', 'Polygon']
+            },
+            {
+                id: 'measure-lines-labels',
+                type: 'symbol',
+                source: 'PolygonDrawHandler',
+                layout: {
+                    'text-field': ['get', 'distance'],
+                    'text-font': ['Open Sans Regular'],
+                    'text-size': 8,
+                    'symbol-placement': 'line-center',
+                },
+                filter: ['in', '$type', 'LineString']
+            },
+        ];
 
-        this.linestring = {
-            'type': 'Feature',
-            'properties': {},
-            'geometry': {
-                'type': 'LineString',
-                'coordinates': []
-            }
-        };
+        this.addLayers();
     }
 
     getDefaultStatusText() {
@@ -23,7 +68,7 @@ export default class PolygonDrawHandler extends DrawHandler {
         var selectedFeatures = this.map.value.queryRenderedFeatures(e.point, {
             layers: ['measure-points']
         });
-        
+
         if (this.currentDrawingCollection.features.length > 1) {
             this.currentDrawingCollection.features.pop();
         }
@@ -40,7 +85,9 @@ export default class PolygonDrawHandler extends DrawHandler {
 
                 var line = turf.lineString(points);
                 var polygon = turf.lineToPolygon(line);
-                this.createGarden(polygon);
+                this.currentDrawingCollection.features = [polygon];
+                this.refreshCurrentDrawing();
+                window.setTimeout(() => this.createGarden(polygon), 100);
             }
         } else {
             var point = {
@@ -58,12 +105,21 @@ export default class PolygonDrawHandler extends DrawHandler {
 
         if (this.currentDrawingCollection.features.length > 1) {
             // Create line through points
-            this.linestring.geometry.coordinates = this.currentDrawingCollection.features.map(
-                function (point) {
-                    return point.geometry.coordinates;
-                }
+            this.currentDrawingCollection.features.push(
+                this.createFeature('LineString', this.currentDrawingCollection.features.map(point => point.geometry.coordinates))
             );
-            this.currentDrawingCollection.features.push(this.linestring);
         }
+
+        this.refreshCurrentDrawing();
+    }
+
+    onMouseMove(e) {
+        var features = this.map.value.queryRenderedFeatures(e.point, {
+            layers: ['measure-points']
+        });
+
+        this.map.value.getCanvas().style.cursor = features.length
+            ? 'pointer'
+            : 'crosshair';
     }
 }

@@ -29,12 +29,36 @@ const editGarden = ref(false);
 const gardenShape = ref('Rectangle');
 const statusText = ref();
 
-let drawHandlers;
+let drawHandler;
 
 function startEditGarden(shape) {
-    editGarden.value = true;
-    gardenShape.value = shape;
-    statusText.value = drawHandlers[shape].getDefaultStatusText();
+    if (shape === 'Rectangle') {
+        drawHandler = new RectangleDrawHandler(map, statusText)
+    } else if (shape === 'Polygon') {
+        drawHandler = new PolygonDrawHandler(map, statusText)
+    } else if (shape === 'Circle') {
+        drawHandler = new CircleDrawHandler(map, statusText)
+    } else {
+        drawHandler = null;
+    }
+
+    if (drawHandler) {
+        editGarden.value = true;
+        gardenShape.value = shape;
+        statusText.value = drawHandler.getDefaultStatusText();
+    }
+}
+
+function deleteGarden(gardenId) {
+    if (gardenId) {
+        axios.delete('gardens/' + gardenId)
+            .then(response => {
+                map.value.getSource('gardens.geojson').setData(response.data);
+                map.value.flyTo({zoom: map.value.getZoom() - 3});
+                selectedGarden.value = null;
+            })
+            .catch(err => console.error(err));
+    }
 }
 
 function getInitialState() {
@@ -67,19 +91,13 @@ onMounted(() => {
             'data': '/gardens.geojson'
         });
 
-        drawHandlers = {
-            Rectangle: new RectangleDrawHandler(map, statusText),
-            Polygon: new PolygonDrawHandler(map, statusText),
-            Circle: new CircleDrawHandler(map, statusText),
-        }
-
         for (const layer in mapLayers) {
             map.value.addLayer(mapLayers[layer]);
         }
 
         map.value.on('click', function (e) {
             if (editGarden.value) {
-                drawHandlers[gardenShape.value].onClick(e);
+                drawHandler.onClick(e);
             } else {
                 var selectedFeatures = map.value.queryRenderedFeatures(e.point, {
                     layers: ['garden-fill']
@@ -94,18 +112,10 @@ onMounted(() => {
                 }
             }
         });
-        
+
         map.value.on('mousemove', function (e) {
             if (editGarden.value) {
-                var features = map.value.queryRenderedFeatures(e.point, {
-                    layers: ['measure-points']
-                });
-
-                map.value.getCanvas().style.cursor = features.length
-                    ? 'pointer'
-                    : 'crosshair';
-
-                drawHandlers[gardenShape.value].onMouseMove(e);
+                drawHandler.onMouseMove(e);
             } else {
                 var features = map.value.queryRenderedFeatures(e.point, {
                     layers: ['garden-fill']
@@ -134,7 +144,8 @@ onUnmounted(() => {
 
         <GardenDetails :garden="selectedGarden" :plants="plants" :selectedPlant="selectedPlant"
                        v-on:close="selectedGarden = null"
-                       v-on:plantSelected="(plant) => selectedPlant = plant"/>
+                       v-on:plantSelected="(plant) => selectedPlant = plant"
+                       v-on:deleteGarden="() => deleteGarden(selectedGarden.properties.id)"/>
 
         <div class="flex mb-8">
             <div>{{ statusText }}</div>
@@ -159,7 +170,7 @@ onUnmounted(() => {
                             <MenuItems
                                 class="absolute right-0 z-10 mt-2 -mr-1 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                                 <div class="py-1">
-                                    <MenuItem v-for="shape in Object.keys(drawHandlers)" :key="shape"
+                                    <MenuItem v-for="shape in ['Rectangle', 'Polygon', 'Circle']" :key="shape"
                                               v-slot="{ active }">
                                         <button
                                             @click="startEditGarden(shape)"

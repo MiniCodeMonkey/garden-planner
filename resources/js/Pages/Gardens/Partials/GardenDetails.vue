@@ -2,6 +2,7 @@
 import 'maplibre-gl/dist/maplibre-gl.css';
 import {Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot} from '@headlessui/vue'
 import {XMarkIcon} from '@heroicons/vue/24/outline'
+import DangerButton from "@/Components/DangerButton.vue";
 
 const props = defineProps({
     garden: Object,
@@ -28,7 +29,7 @@ const props = defineProps({
                                     <div class="px-4 sm:px-6">
                                         <div class="flex items-start justify-between">
                                             <DialogTitle class="text-base font-semibold leading-6 text-gray-900">
-                                                Select plants
+                                                {{ garden?.properties?.name }}
                                             </DialogTitle>
                                             <div class="ml-3 flex h-7 items-center">
                                                 <button type="button"
@@ -69,6 +70,11 @@ const props = defineProps({
                                                 </div>
                                             </button>
                                         </div>
+
+                                        <div class="w-full border-t border-gray-300 mt-8"></div>
+
+                                        <DangerButton @click="$emit('deleteGarden')" class="mt-4">Delete this garden
+                                        </DangerButton>
                                     </div>
                                 </div>
                             </DialogPanel>

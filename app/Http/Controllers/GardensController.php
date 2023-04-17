@@ -43,7 +43,7 @@ class GardensController extends Controller
 
         $request->user()->gardens()->save($garden);
 
-        return response()->json($garden);
+        return $this->geojson($request);
     }
 
     public function edit(Request $request, Garden $garden): Response
@@ -56,8 +56,12 @@ class GardensController extends Controller
         // TODO
     }
 
-    public function destroy(Request $request, Garden $garden): Response
+    public function destroy(Request $request, Garden $garden): JsonResponse
     {
-        // TODO
+        if ($request->user()->id === $garden->user->id) {
+            $garden->delete();
+        }
+
+        return $this->geojson($request);
     }
 }
