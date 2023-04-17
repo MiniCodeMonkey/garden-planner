@@ -47,9 +47,9 @@ export default class DrawHandler {
 
         const name = prompt('What should we call this lovely garden?');
 
-        if (name) {
-            this.destruct();
+        this.destruct();
 
+        if (name) {
             axios.post('gardens', {name, geojson: feature, area: turf.area(feature)})
                 .then(response => {
                     this.map.value.getSource('gardens.geojson').setData(response.data);
