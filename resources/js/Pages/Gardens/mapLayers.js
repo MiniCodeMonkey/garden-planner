@@ -46,11 +46,15 @@ export default [
         filter: ['in', '$type', 'Polygon']
     },
     {
-        id: 'garden-labels',
+        id: 'garden-label',
         type: 'symbol',
         source: 'gardens.geojson',
         layout: {
-            'text-field': ['get', 'area'],
+            'text-field': ["format",
+                ['get', 'name'], {"font-scale": 1.0},
+                "\n",
+                ['get', 'area'], {"font-scale": 0.8}
+            ],
             'text-font': ['Open Sans Regular'],
             'text-size': 8
         }

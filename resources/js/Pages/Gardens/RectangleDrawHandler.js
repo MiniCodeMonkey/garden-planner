@@ -62,13 +62,18 @@ export default class RectangleDrawHandler extends DrawHandler {
             const bbox = turf.bbox(line);
             const bboxPolygon = turf.bboxPolygon(bbox);
 
-            const width = Math.round(turf.distance([bbox[0], bbox[1]], [bbox[2], bbox[3]], {units: "centimeters"}));
-            const height = Math.round(turf.distance([bbox[0], bbox[1]], [bbox[0], bbox[3]], {units: "centimeters"}));
+            const [minX, minY, maxX, maxY] = bbox;
+
+            const width = Math.round(turf.distance([minX, minY], [maxX, minY], {units: "centimeters"}));
+            const height = Math.round(turf.distance([minX, minY], [minX, maxY], {units: "centimeters"}));
             const area = Math.round(turf.area(bboxPolygon));
 
             this.statusText.value = `${width}cm x ${height}cm - ${area}m2`
 
-            this.currentDrawingCollection.features = [bboxPolygon];
+            this.currentDrawingCollection.features = [
+                bboxPolygon
+            ];
+            
             this.refreshCurrentDrawing();
         }
     }

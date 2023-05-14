@@ -30,6 +30,13 @@ const gardenShape = ref('Rectangle');
 const statusText = ref();
 
 let drawHandler;
+let plantFeatures = {
+    'type': 'geojson',
+    'data': {
+        'type': 'FeatureCollection',
+        'features': []
+    }
+};
 
 function startEditGarden(shape) {
     if (shape === 'Rectangle') {
@@ -47,6 +54,20 @@ function startEditGarden(shape) {
         gardenShape.value = shape;
         statusText.value = drawHandler.getDefaultStatusText();
     }
+}
+
+function selectPlant(plant) {
+    selectedPlant.value = plant
+    const seedDistance = plant.seed?.seed_distance_min || 40;
+    updateGrid(seedDistance);
+}
+
+function updateGrid(gridSize) {
+    const bbox = turf.bbox(selectedGarden.value);
+
+    const options = {units: 'centimeters'};
+    const grid = turf.squareGrid(bbox, gridSize, options);
+    map.value.getSource('grid').setData(grid);
 }
 
 function deleteGarden(gardenId) {
@@ -86,6 +107,24 @@ onMounted(() => {
     map.value.addControl(new NavigationControl(), 'top-right');
 
     map.value.on('load', function () {
+        map.value.loadImage('https://cdn.shopify.com/s/files/1/0276/3902/1652/products/Salat_Valmaine_illustration_1080x.jpg?v=1605905545', function (error, image) {
+            if (error) {
+                throw error;
+            }
+
+            map.value.addImage('plant', image);
+            map.value.addSource('plants', plantFeatures);
+            map.value.addLayer({
+                'id': 'plant-image',
+                'type': 'symbol',
+                'source': 'plants',
+                'layout': {
+                    'icon-image': 'plant',
+                    'icon-size': 0.25
+                }
+            });
+        });
+
         map.value.addSource('gardens.geojson', {
             'type': 'geojson',
             'data': '/gardens.geojson'
@@ -106,6 +145,17 @@ onMounted(() => {
         map.value.on('click', function (e) {
             if (editGarden.value) {
                 drawHandler.onClick(e);
+            } else if (selectedPlant.value) {
+                const point = [e.lngLat.lng, e.lngLat.lat];
+                plantFeatures.features.push({
+                    'type': 'Feature',
+                    'properties': {},
+                    'geometry': {
+                        'type': 'Point',
+                        'coordinates': point
+                    }
+                });
+                this.map.value.getSource('plants').setData(plantFeatures);
             } else {
                 var selectedFeatures = map.value.queryRenderedFeatures(e.point, {
                     layers: ['garden-fill']
@@ -118,11 +168,7 @@ onMounted(() => {
                     const bounds = [[bbox[0], bbox[1]], [bbox[2], bbox[3]]];
                     map.value.fitBounds(bounds);
 
-                    var cellSide = 15;
-                    var options = {units: 'centimeters'};
-                    var hexgrid = turf.squareGrid(bbox, cellSide, options);
-
-                    map.value.getSource('grid').setData(hexgrid);
+                    updateGrid(40);
                 }
             }
         });
@@ -158,7 +204,7 @@ onUnmounted(() => {
 
         <GardenDetails :garden="selectedGarden" :plants="plants" :selectedPlant="selectedPlant"
                        v-on:close="selectedGarden = null"
-                       v-on:plantSelected="(plant) => selectedPlant = plant"
+                       v-on:plantSelected="plant => selectPlant(plant)"
                        v-on:deleteGarden="() => deleteGarden(selectedGarden.properties.id)"/>
 
         <div class="flex mb-8">
