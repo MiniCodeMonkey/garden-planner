@@ -8,6 +8,7 @@ import {Bars3Icon, XMarkIcon} from '@heroicons/vue/24/outline'
 const navigation = [
     {name: 'Dashboard', href: '/dashboard', current: route().current('dashboard')},
     {name: 'Seeds', href: '/seeds', current: route().current('seeds.*')},
+    {name: 'Trays', href: '/trays', current: route().current('trays.*')},
     {name: 'Plants', href: '/plants', current: route().current('plants.*')},
     {name: 'Gardens', href: '/gardens', current: route().current('garden')},
     {name: 'Calendar', href: '/calendar', current: route().current('calendar')},
