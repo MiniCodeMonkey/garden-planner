@@ -60,9 +60,11 @@ defineProps({
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                                     {{ dayjs(plant.created_at).format('D/M') }}
                                 </td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{
-                                        plant.location
-                                    }}
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                    <Link v-if="plant.tray" :href="route('trays.show', plant.seed_tray_id)">
+                                        {{ plant.tray.type }} {{ plant.tray.name }}
+                                    </Link>
+                                    <span v-else>{{ plant.location }}</span>
                                 </td>
                             </tr>
                             </tbody>

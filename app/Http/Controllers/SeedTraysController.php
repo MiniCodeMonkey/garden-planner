@@ -3,11 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\SeedTray;
-use Illuminate\Database\Query\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
-use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -15,71 +13,69 @@ class SeedTraysController extends Controller
 {
     public function index(Request $request): Response
     {
-        $plants = $request->user()->plants;
+        $trays = $request->user()->trays;
+
         return Inertia::render('Trays/Index', [
-            'plants' => $plants
+            'trays' => $trays
         ]);
     }
 
-    public function create(Request $request): Response
+    public function create(): Response
     {
-        $tray = $request->user()->trays()
-            ->where('id', $request->input('tray'))
-            ->first();
-
-        abort_unless($tray, 404);
-
-        return Inertia::render('Trays/Create', [
-            'tray' => $tray
-        ]);
+        return Inertia::render('Trays/Create');
     }
 
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'tray_id' => ['required', Rule::exists('trays', 'id')->where(function (Builder $query) use ($request) {
-                return $query->where('user_id', $request->user()->id);
-            })],
-            'date' => 'required|date',
-            'quantity' => 'required|integer',
-            'location' => 'required',
+            'name' => 'required',
+            'type' => 'required',
+            'rows' => 'required|integer',
+            'columns' => 'required|integer',
         ]);
 
-        $tray = $request->user()->trays()
-            ->where('id', $request->input('tray_id'))
-            ->first();
+        $tray = new SeedTray();
+        $tray->name = $request->input('name');
+        $tray->type = $request->input('type');
+        $tray->rows = $request->input('rows');
+        $tray->columns = $request->input('columns');
 
-        $plant = new SeedTray();
-        $plant->created_at = $request->input('date');
-        $plant->quantity = $request->input('quantity');
-        $plant->location = $request->input('location');
-        $plant->notes = $request->input('notes');
+        $request->user()->trays()->save($tray);
 
-        $tray->plants()->save($plant);
-
-        return Redirect::route('plants.show', $plant);
+        return Redirect::route('trays.show', $tray);
     }
 
-    public function show(Request $request, SeedTray $plant): Response
+    public function show(Request $request, SeedTray $tray): Response
     {
-        abort_unless($plant->tray->user->id === $request->user()->id, 403);
+        abort_unless($tray->user->id === $request->user()->id, 403);
+        $plants = $tray->plants()
+            ->with('seed')
+            ->get()
+            ->mapWithKeys(function ($plant) {
+                $locations = collect(explode('|', $plant->seed_tray_locations));
+
+                return $locations->mapWithKeys(function ($location) use ($plant) {
+                    return [$location => $plant];
+                });
+            });
 
         return Inertia::render('Trays/Show', [
-            'plant' => $plant
+            'tray' => $tray,
+            'plants' => $plants,
         ]);
     }
 
-    public function edit(Request $request, SeedTray $plant): Response
+    public function edit(Request $request, SeedTray $tray): Response
     {
         // TODO
     }
 
-    public function update(Request $request, SeedTray $plant): Response
+    public function update(Request $request, SeedTray $tray): Response
     {
         // TODO
     }
 
-    public function destroy(Request $request, SeedTray $plant): Response
+    public function destroy(Request $request, SeedTray $tray): Response
     {
         // TODO
     }

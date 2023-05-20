@@ -15,7 +15,11 @@ class PlantsController extends Controller
 {
     public function index(Request $request): Response
     {
-        $plants = $request->user()->plants;
+        $plants = $request->user()
+            ->plants()
+            ->with('tray')
+            ->get();
+
         return Inertia::render('Plants/Index', [
             'plants' => $plants
         ]);
@@ -65,7 +69,7 @@ class PlantsController extends Controller
         abort_unless($plant->seed->user->id === $request->user()->id, 403);
 
         return Inertia::render('Plants/Show', [
-            'plant' => $plant
+            'plant' => $plant->load('tray')
         ]);
     }
 
