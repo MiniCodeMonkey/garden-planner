@@ -6,6 +6,7 @@ use App\Http\Controllers\GardensController;
 use App\Http\Controllers\PlantsController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SeedsController;
+use App\Http\Controllers\SeedTraysController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Route;
@@ -47,6 +48,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('gardens', GardensController::class)->except(['create', 'edit']);
     Route::get('gardens.geojson', [GardensController::class, 'geojson']);
     Route::resource('plants', PlantsController::class);
+    Route::resource('trays', SeedTraysController::class);
 
     Route::get('calendar', [CalendarController::class, 'index'])->name('calendar.index');
 });

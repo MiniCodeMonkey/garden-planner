@@ -59,6 +59,11 @@ class User extends Authenticatable
         return $this->hasMany(Seed::class);
     }
 
+    public function trays()
+    {
+        return $this->hasMany(SeedTray::class);
+    }
+
     public function gardens()
     {
         return $this->hasMany(Garden::class);

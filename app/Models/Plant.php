@@ -15,4 +15,9 @@ class Plant extends Model
     {
         return $this->belongsTo(Seed::class);
     }
+
+    public function tray()
+    {
+        return $this->belongsTo(SeedTray::class, 'seed_tray_id');
+    }
 }

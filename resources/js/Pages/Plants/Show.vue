@@ -3,7 +3,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import {Head, Link} from '@inertiajs/vue3';
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime';
-import {DocumentIcon, PencilSquareIcon, SparklesIcon} from '@heroicons/vue/24/outline'
+import {DocumentIcon, PencilSquareIcon} from '@heroicons/vue/24/outline'
 
 dayjs.extend(relativeTime)
 
@@ -33,16 +33,10 @@ defineProps({
                             </div>
                             <div
                                 class="justify-stretch mt-6 flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-4">
-                                <button type="button"
-                                        class="inline-flex justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
-                                    <SparklesIcon class="-ml-0.5 h-5 w-5 text-gray-400" aria-hidden="true"/>
-                                    Plant
-                                </button>
-
                                 <Link :href="route('seeds.show', { id: plant.seed.id })"
                                       class="inline-flex justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                                     <DocumentIcon class="-ml-0.5 h-5 w-5 text-gray-400" aria-hidden="true"/>
-                                    Seed
+                                    Seed information
                                 </Link>
 
                                 <button type="button"
@@ -68,7 +62,12 @@ defineProps({
 
                     <div class="sm:col-span-1">
                         <dt class="text-sm font-medium text-gray-500">Location</dt>
-                        <dd class="mt-1 text-sm text-gray-900">{{ plant.location }}</dd>
+                        <dd class="mt-1 text-sm text-gray-900">
+                            <Link v-if="plant.tray" :href="route('trays.show', plant.seed_tray_id)">
+                                {{ plant.tray.type }} {{ plant.tray.name }}
+                            </Link>
+                            <span v-else>{{ plant.location }}</span>
+                        </dd>
                     </div>
 
                     <div class="sm:col-span-1">
