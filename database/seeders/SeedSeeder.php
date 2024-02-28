@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use App\Models\Seed;
 use App\Models\SeedInventory;
 use App\Models\User;
-use App\WebsiteMetadataImageDownloader;
+use App\WebsiteMetadataDownloader;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 
@@ -36,7 +36,7 @@ class SeedSeeder extends Seeder
                 $seed->variety = $row['Variety'] === '?' ? null : $row['Variety'];
                 $seed->category = $row['Category'];
                 $seed->link = $row['Link'];
-                $seed->image_filename = (new WebsiteMetadataImageDownloader())->downloadForUrl($row['Link']);
+                $seed->image_filename = (new WebsiteMetadataDownloader())->downloadImageForUrl($row['Link']);
                 $seed->green_house = $row['Green house?'] === 'Yes';
 
                 [$sproutingTimeDaysMin, $sproutingTimeDaysMax] = explode('-', $row['Sprouting time (days)'] . '-');

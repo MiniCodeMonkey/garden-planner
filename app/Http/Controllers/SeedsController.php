@@ -4,10 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Seed;
 use App\Models\User;
-use App\WebsiteMetadataImageDownloader;
+use App\WebsiteMetadataDownloader;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -131,6 +132,23 @@ class SeedsController extends Controller
         ]);
     }
 
+    /*
+     * Given a URL, remove all query parameters that starts with an underscore
+     */
+    private function cleanUrl(string $url) {
+        $query = parse_url($url, PHP_URL_QUERY);
+        parse_str($query, $queryParameters);
+        
+        foreach ($queryParameters as $key => $val) {
+            if ($key[0] === '_') {
+                unset($queryParameters[$key]);
+            }
+        }
+        
+        $urlWithoutQuery = Str::before($url, '?');
+        return rtrim($urlWithoutQuery . '?' . http_build_query($queryParameters), '?');
+    }
+
     public function update(Request $request, Seed $seed): RedirectResponse
     {
         abort_unless($seed->user->id === $request->user()->id, 403);
@@ -141,11 +159,16 @@ class SeedsController extends Controller
             'link' => 'url'
         ]);
 
+        $url = $this->cleanUrl($request->input('link'));
+
+        $metadataDownloader = new WebsiteMetadataDownloader();
+        dd($metadataDownloader->downloadMetadataForUrl($url));
+
         $seed->name = $request->input('name');
         $seed->variety = $request->input('variety');
         $seed->category = $request->input('category');
-        $seed->link = $request->input('link');
-        $seed->image_filename = (new WebsiteMetadataImageDownloader())->downloadForUrl($seed->link);
+        $seed->link = $url;
+        $seed->image_filename = $metadataDownloader->downloadImageForUrl($url);
         $seed->green_house = $request->input('green_house');
         $seed->sprouting_time_days_min = $request->input('sprouting_time_days_min');
         $seed->sprouting_time_days_max = $request->input('sprouting_time_days_max');

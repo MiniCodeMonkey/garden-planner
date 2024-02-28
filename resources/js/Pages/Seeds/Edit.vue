@@ -106,6 +106,10 @@ const form = useForm({
                 </div>
 
                 <div>
+                    <PrimaryButton :disabled="form.processing">Populate seed details from URL</PrimaryButton>
+                </div>
+
+                <div>
                     <div class="flex items-center">
                         <Checkbox id="green_house" name="green_house" class="mr-2" v-model:checked="form.green_house"/>
                         <InputLabel for="green_house" value="Should be planted in green house"/>
